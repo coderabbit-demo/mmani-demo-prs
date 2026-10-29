@@ -96,7 +96,8 @@ function releaseRedemption(db: DatabaseSync, orderId: string, code: string): voi
  *
  * - Re-applying the code already on the order is a no-op.
  * - A different code replaces the current one and releases its redemption.
- * - Fixed-amount codes can be redeemed once per customer, across all carts.
+ * - A code can be redeemed once per order; shoppers can use it again on a new
+ *   cart after abandoning one.
  * - The redemption is reserved with a conditional increment in the same
  *   transaction as the order update, so `max_redemptions` holds under
  *   concurrency and a failure leaves nothing behind.
@@ -119,12 +120,10 @@ export async function applyDiscountCode(
   try {
     if (order.discountCode) releaseRedemption(db, order.id, order.discountCode);
 
-    if (code.kind === "fixed") {
-      const used = db
-        .prepare("SELECT 1 FROM discount_redemptions WHERE code = ? AND customer_id = ?")
-        .get(code.code, order.customerId);
-      if (used) throw new HttpError(409, "You have already used this code");
-    }
+    const used = db
+      .prepare("SELECT 1 FROM discount_redemptions WHERE code = ? AND order_id = ?")
+      .get(code.code, order.id);
+    if (used) throw new HttpError(409, "This code is already applied to this order");
 
     const reserved = db
       .prepare(
