@@ -26,7 +26,7 @@ or from trusted services (`x-service-token`, read-only).
 - Discounts are order-level: `orders.discount_code` and `orders.discount_cents`
   (`0..subtotal`). Order lines never carry discounts.
 - `discount_redemptions` holds one row per discounted order. Fixed-amount codes are limited to
-  one redemption per customer; `max_redemptions` is reserved with a conditional increment in
-  the same transaction as the order update (`services/orders/src/discounts.ts`).
+  one redemption per customer; `max_redemptions` is checked before each redemption is recorded
+  (`services/orders/src/discounts.ts`).
 - Totals are derived in `services/orders/src/pricing.ts`: `subtotal = Σ line totals`,
   `net = subtotal − discount`.
