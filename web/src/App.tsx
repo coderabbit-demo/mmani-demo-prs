@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import type { Product } from "../../packages/contracts/src/catalog.ts";
-import type { Order } from "../../packages/contracts/src/orders.ts";
+import type { Order, OrderSummary } from "../../packages/contracts/src/orders.ts";
 import { api, formatCents, type Shopper } from "./api.ts";
 import { Cart } from "./Cart.tsx";
+import { OrderHistory } from "./OrderHistory.tsx";
 
 export function App() {
   const [shoppers, setShoppers] = useState<Shopper[]>([]);
@@ -11,6 +12,7 @@ export function App() {
   const [order, setOrder] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<OrderSummary[]>([]);
 
   useEffect(() => {
     api.shoppers().then((list) => {
@@ -23,6 +25,7 @@ export function App() {
     if (!token) return;
     setOrder(null);
     api.products(token).then(setProducts, (err) => setError(String(err.message)));
+    api.orderHistory(token).then(setHistory, (err) => setError(String(err.message)));
   }, [token]);
 
   async function run(action: () => Promise<Order>) {
@@ -83,22 +86,26 @@ export function App() {
             </article>
           ))}
         </section>
-        <Cart
-          order={order}
-          busy={busy}
-          onQuantity={(sku, quantity) =>
-            quantity >= 1 && void run(() => api.setLine(token!, order!.id, sku, quantity))
-          }
-          onRemove={(sku) => void run(() => api.removeLine(token!, order!.id, sku))}
-          onApplyCode={(code) => void run(() => api.applyDiscount(token!, order!.id, code))}
-          onCheckout={() =>
-            void run(async () => {
-              const placed = await api.checkout(token!, order!.id);
-              setProducts(await api.products(token!));
-              return placed;
-            })
-          }
-        />
+        <div className="side">
+          <Cart
+            order={order}
+            busy={busy}
+            onQuantity={(sku, quantity) =>
+              quantity >= 1 && void run(() => api.setLine(token!, order!.id, sku, quantity))
+            }
+            onRemove={(sku) => void run(() => api.removeLine(token!, order!.id, sku))}
+            onApplyCode={(code) => void run(() => api.applyDiscount(token!, order!.id, code))}
+            onCheckout={() =>
+              void run(async () => {
+                const placed = await api.checkout(token!, order!.id);
+                setProducts(await api.products(token!));
+                setHistory(await api.orderHistory(token!));
+                return placed;
+              })
+            }
+          />
+          <OrderHistory orders={history} />
+        </div>
       </main>
     </div>
   );
