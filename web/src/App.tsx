@@ -11,6 +11,7 @@ export function App() {
   const [order, setOrder] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sort, setSort] = useState("name");
 
   useEffect(() => {
     api.shoppers().then((list) => {
@@ -22,8 +23,8 @@ export function App() {
   useEffect(() => {
     if (!token) return;
     setOrder(null);
-    api.products(token).then(setProducts, (err) => setError(String(err.message)));
-  }, [token]);
+    api.products(token, sort).then(setProducts, (err) => setError(String(err.message)));
+  }, [token, sort]);
 
   async function run(action: () => Promise<Order>) {
     setBusy(true);
@@ -53,6 +54,13 @@ export function App() {
     <div className="shell">
       <header>
         <h1>Rabbit Outfitters</h1>
+        <label>
+          Sort{" "}
+          <select value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="name">Name</option>
+            <option value="price_cents">Price</option>
+          </select>
+        </label>
         <label>
           Shopping as{" "}
           <select value={token ?? ""} onChange={(e) => setToken(e.target.value)}>
@@ -90,10 +98,11 @@ export function App() {
             quantity >= 1 && void run(() => api.setLine(token!, order!.id, sku, quantity))
           }
           onRemove={(sku) => void run(() => api.removeLine(token!, order!.id, sku))}
+          onApplyCode={(code) => void run(() => api.applyDiscount(token!, order!.id, code))}
           onCheckout={() =>
             void run(async () => {
               const placed = await api.checkout(token!, order!.id);
-              setProducts(await api.products(token!));
+              setProducts(await api.products(token!, sort));
               return placed;
             })
           }

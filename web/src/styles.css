@@ -44,3 +44,6 @@ button.link { border: none; background: none; color: var(--muted); padding: 0; m
 .net { font-weight: 700; }
 .error { background: #fde8e8; color: #8a1c1c; padding: 10px 12px; border-radius: 8px; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.code { display: flex; gap: 8px; margin-top: 16px; }
+.code input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+.code button { margin-top: 0; }

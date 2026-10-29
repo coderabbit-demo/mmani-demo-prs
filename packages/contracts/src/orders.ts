@@ -15,6 +15,7 @@ export type OrderStatus = "cart" | "placed" | "cancelled";
 export interface OrderLine {
   sku: string;
   name: string;
+  /** Units ordered. Discount adjustment lines (`DISCOUNT-<code>`) use -1. */
   quantity: number;
   unitPriceCents: number;
   lineTotalCents: number;

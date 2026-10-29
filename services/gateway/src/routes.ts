@@ -20,5 +20,6 @@ export const ROUTES: Route[] = [
   { method: "GET", path: "/orders/:orderId", upstream: "orders", target: "/orders/:orderId" },
   { method: "PUT", path: "/orders/:orderId/lines/:sku", upstream: "orders", target: "/orders/:orderId/lines/:sku" },
   { method: "DELETE", path: "/orders/:orderId/lines/:sku", upstream: "orders", target: "/orders/:orderId/lines/:sku" },
+  { method: "POST", path: "/orders/:orderId/discount", upstream: "orders", target: "/orders/:orderId/discount" },
   { method: "POST", path: "/orders/:orderId/checkout", upstream: "orders", target: "/orders/:orderId/checkout" },
 ];
