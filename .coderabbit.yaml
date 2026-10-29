@@ -1,0 +1,115 @@
+# yaml-language-server: $schema=https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json
+# =============================================================================
+# CodeRabbit config for mmani-demo-prs (Rabbit Outfitters microservices demo).
+# Rules live in code: path instructions, org + commerce guidelines, a linked
+# downstream consumer, and pre-merge checks that gate security and order invariants.
+# =============================================================================
+language: en-US
+
+reviews:
+  profile: chill
+  high_level_summary: true
+  changed_files_summary: true
+  sequence_diagrams: true
+  estimate_code_review_effort: true
+  assess_linked_issues: true
+  related_issues: true
+  related_prs: true
+  suggested_labels: true
+  suggested_reviewers: true
+  poem: false
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+
+  path_filters:
+    - "!**/package-lock.json"
+    - "!web/dist/**"
+
+  path_instructions:
+    - path: "services/**/src/**/*.ts"
+      instructions: |
+        Each service owns its database. Every SQL value must be a bound parameter; flag any
+        SQL built with template literals or concatenation as an injection risk. Multi-row or
+        multi-table writes must be in one transaction. Outbound calls need a bounded timeout.
+    - path: "services/orders/**"
+      instructions: |
+        Orders invariants: lines are physical catalog SKUs with quantity >= 1; discounts are
+        order-level (orders.discount_cents), never order lines; 0 <= discountCents <=
+        subtotalCents; netCents is never negative; only carts can change. Flag any change that
+        weakens a CHECK constraint or bypasses these rules.
+    - path: "packages/contracts/**"
+      instructions: |
+        orders.ts is a cross-repository contract consumed by
+        coderabbit-demo/mmani-demo-prs-consumer. Flag semantic changes, not only renames.
+    - path: "tests/**"
+      instructions: |
+        Tests encode intended behavior. A test that asserts a wrong result (for example a
+        negative total or a negative quantity) is a defect, not evidence of correctness.
+
+  tools:
+    gitleaks:
+      enabled: true
+    semgrep:
+      enabled: true
+
+  pre_merge_checks:
+    docstrings:
+      mode: warning
+      threshold: 80
+    title:
+      mode: warning
+      requirements: "Use Conventional Commits, e.g. 'feat(orders): add discount codes'."
+    description:
+      mode: warning
+    issue_assessment:
+      mode: warning
+    custom_checks:
+      - name: "Security Gate"
+        mode: error
+        instructions: >-
+          Fail only when the review finds a major or critical SECURITY issue in this PR, such
+          as SQL injection, broken access control, secrets in code, or SSRF. Do not fail on
+          functional or style issues.
+      - name: "Order Invariants"
+        mode: error
+        instructions: >-
+          Fail when the PR can produce an order line with quantity < 1, a negative unit price,
+          a discount stored as an order line, discountCents greater than subtotalCents, a
+          negative netCents, a weakened CHECK constraint, or a discount redemption that is not
+          atomic. Otherwise pass.
+
+  finishing_touches:
+    docstrings:
+      enabled: true
+    unit_tests:
+      enabled: true
+
+knowledge_base:
+  opt_out: false
+  learnings:
+    scope: auto
+  issues:
+    scope: auto
+  pull_requests:
+    scope: auto
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "AGENTS.md"
+      - "docs/**/*.md"
+      - "coderabbit-demo/coderabbit-standards:guidelines/**/*.md"
+      - "coderabbit-demo/coderabbit-standards:commerce/**/*.md"
+  automatic_linking_mode: disabled
+  linked_repositories:
+    - repository: "coderabbit-demo/mmani-demo-prs-consumer"
+      instructions: >-
+        Downstream fulfillment and finance service. It calls GET /orders/:id on the orders
+        service. src/warehouse/pickList.ts sums lines[].quantity per SKU into pick tasks and
+        decrements on-hand stock; src/finance/ledger.ts posts totals.netCents as receivable,
+        totals.subtotalCents as revenue, totals.discountCents as discounts, attributes
+        lineTotalCents to SKUs, and caps refunds at netCents. Report changes in this PR that
+        would break those call sites, including non-physical or negative-quantity lines and
+        negative or double-counted totals.

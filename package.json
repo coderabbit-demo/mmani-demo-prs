@@ -1,0 +1,30 @@
+{
+  "name": "mmani-demo-prs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rabbit Outfitters: a small microservices e-commerce app used for CodeRabbit PR demos.",
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev": "node scripts/dev.ts",
+    "start": "npm run build:web && node scripts/dev.ts --no-vite",
+    "build:web": "vite build",
+    "test": "node --no-warnings=ExperimentalWarning --test 'tests/*.test.ts'",
+    "typecheck": "tsc -p tsconfig.json",
+    "check": "npm run typecheck && npm test"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0"
+  }
+}

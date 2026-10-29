@@ -1,0 +1,41 @@
+# Full stack: storefront + gateway on http://localhost:8080.
+# Add the fulfillment consumer (coderabbit-demo/mmani-demo-prs-consumer) by
+# setting FULFILLMENT_URL on the orders service.
+x-env: &env
+  GATEWAY_TOKEN: dev-gateway-token
+  SERVICE_TOKEN: dev-service-token
+
+services:
+  catalog:
+    build: .
+    command: ["node", "services/catalog/src/server.ts"]
+    environment:
+      <<: *env
+      CATALOG_DB: /data/catalog.db
+    volumes: [catalog-data:/data]
+
+  orders:
+    build: .
+    command: ["node", "services/orders/src/server.ts"]
+    environment:
+      <<: *env
+      ORDERS_DB: /data/orders.db
+      CATALOG_URL: http://catalog:4001
+    volumes: [orders-data:/data]
+    depends_on: [catalog]
+
+  gateway:
+    build: .
+    environment:
+      <<: *env
+      CATALOG_URL: http://catalog:4001
+      ORDERS_URL: http://orders:4002
+    ports: ["8080:8080"]
+    depends_on: [catalog, orders]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8080/api/health').then(r=>process.exit(r.ok?0:1))"]
+      interval: 10s
+
+volumes:
+  catalog-data:
+  orders-data:
