@@ -48,6 +48,7 @@ npm run check        # tsc + integration tests (in-memory stack on ephemeral por
 
 - [`AGENTS.md`](AGENTS.md) — instructions for humans and coding agents working here.
 - [`docs/architecture.md`](docs/architecture.md) — service boundaries and the order contract.
+- [`docs/demo-guide/`](docs/demo-guide/) — Do / Say / See runbook (PDF + source) for the PR #3 demo.
 - Org standards in [`coderabbit-standards`](https://github.com/coderabbit-demo/coderabbit-standards),
   including the opt-in `commerce/` rules for orders and discounts.
 

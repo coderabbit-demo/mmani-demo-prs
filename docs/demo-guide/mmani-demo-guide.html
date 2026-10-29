@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>mmani-demo-guide</title>
+<style>
+  @page { size: Letter; margin: 0.6in 0.6in 0.7in; }
+  :root { --ink:#1d1b19; --muted:#5f5953; --line:#e2ddd6; --accent:#e8590c; --soft:#fff4ec; --sec:#b42318; --secsoft:#fdecea; --ok:#0f7b3f; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.45; margin: 0; }
+  h1 { font-size: 22pt; margin: 0 0 4pt; }
+  h2 { font-size: 15pt; margin: 22pt 0 6pt; padding-bottom: 4pt; border-bottom: 2px solid var(--accent); page-break-after: avoid; }
+  h3 { font-size: 12pt; margin: 16pt 0 4pt; page-break-after: avoid; }
+  .kicker { font: 600 8.5pt/1 ui-monospace, Menlo, monospace; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; }
+  .lede { color: var(--muted); margin: 6pt 0 0; }
+  code, .mono { font-family: ui-monospace, Menlo, monospace; font-size: 9pt; }
+  code { background: #f3f0eb; padding: 0 3px; border-radius: 3px; }
+  pre { background: #f6f4f0; border: 1px solid var(--line); border-radius: 6px; padding: 8pt 10pt; font-size: 9pt; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0; }
+  th, td { text-align: left; vertical-align: top; padding: 5pt 7pt; border-bottom: 1px solid var(--line); }
+  th { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .dss { border: 1px solid var(--line); border-radius: 8px; margin: 10pt 0; overflow: hidden; }
+  .dss .head { background: #faf8f5; padding: 6pt 10pt; font-weight: 700; border-bottom: 1px solid var(--line); }
+  .dss .head .step { font: 600 8pt ui-monospace, Menlo, monospace; color: var(--accent); margin-right: 6pt; }
+  .dss .cols { display: grid; grid-template-columns: 1fr 1.25fr 1fr; }
+  .dss .cols > div { padding: 7pt 10pt; border-right: 1px solid var(--line); }
+  .dss .cols > div:last-child { border-right: 0; }
+  .dss .lbl { font: 700 8pt ui-monospace, Menlo, monospace; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 3pt; }
+  .dss .say { font-style: italic; }
+  .dss .head, .dss .cols { break-inside: avoid; }
+  .dss { break-before: page; }
+  h2 + .dss, h3 + .dss, p.small + .dss { break-before: auto; }
+  h4 { font-size: 11pt; margin: 14pt 0 4pt; break-after: avoid; }
+  .dss .head { break-after: avoid; }
+  .shot { break-inside: avoid; margin: 0; padding: 8pt 10pt 10pt; border-top: 1px solid var(--line); background: #fff; }
+  .shot img { display: block; max-width: 100%; max-height: 6.2in; margin: 0 auto; border: 1px solid var(--line); border-radius: 4px; }
+  .shot figcaption { font-size: 8.5pt; color: var(--muted); margin-top: 4pt; text-align: center; }
+  .pending { border: 2px dashed #c9c2b8; border-radius: 6px; padding: 16pt; text-align: center; color: var(--muted); background: #fbfaf8; }
+  .call { border-left: 4px solid var(--accent); background: var(--soft); padding: 7pt 10pt; margin: 8pt 0; border-radius: 0 6px 6px 0; page-break-inside: avoid; }
+  .call.sec { border-color: var(--sec); background: var(--secsoft); }
+  .call.dont { border-color: #6b6560; background: #f3f1ee; }
+  .call b.t { font: 700 8pt ui-monospace, Menlo, monospace; text-transform: uppercase; margin-right: 4pt; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8pt; margin: 10pt 0; }
+  .stat { border: 1px solid var(--line); border-radius: 8px; padding: 8pt; }
+  .stat .n { font-size: 20pt; font-weight: 800; color: var(--accent); line-height: 1; }
+  .stat .d { font: 600 7.5pt ui-monospace, Menlo, monospace; color: var(--muted); text-transform: uppercase; margin-top: 4pt; }
+  .trail td:first-child { font-weight: 600; white-space: nowrap; }
+  .tag { display: inline-block; font: 600 7.5pt ui-monospace, Menlo, monospace; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line); }
+  .tag.f1 { color: var(--sec); border-color: #f3b8b1; background: var(--secsoft); }
+  .tag.f2 { color: #8a4b00; border-color: #f5cd98; background: #fff6e8; }
+  .pb { page-break-before: always; }
+  a { color: #1a5fb4; text-decoration: none; }
+  .small { font-size: 9pt; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="kicker">Internal · Do / Say / See runbook · CodeRabbit Field Engineering Enablement</div>
+<h1>Follow one finding: from Jira ticket to Deep Scan</h1>
+<p class="lede">A single feature, written by a coding agent, followed end to end: local review in the CLI and VS Code, the pull request review, Triage, Change Stack, QA Agent, the Security Deep Scan, and QA user journeys. The same two findings appear at every stop. Demo repository <code>coderabbit-demo/mmani-demo-prs</code>, PR #3, Jira story SC-10. Captured October 28, 2026, in light mode. Allow about 25 minutes plus questions.</p>
+
+<div class="call"><b class="t">Open with this</b> "One Jira ticket, one coding agent, one branch. Let's follow two things the agent got wrong — a security hole and a money bug — from the developer's laptop all the way to the security team's scan. Same findings, every stop."</div>
+
+<h2>How to read this runbook</h2>
+<p>Take one stage at a time, top to bottom. Each step has three parts.</p>
+<table>
+  <tr><th>Column</th><th>What it holds</th></tr>
+  <tr><td><b>Do</b></td><td>What to click, type, or open, with the deep link.</td></tr>
+  <tr><td><b>Say</b></td><td>The talk track. Deliver it aloud.</td></tr>
+  <tr><td><b>See</b></td><td>What the audience sees: the finding, check, diagram, or graph.</td></tr>
+</table>
+<p>Callouts: <span class="tag f1">SECURITY</span> marks where security rides in. <b>WOW</b> is the moment to slow down. <b>Don't do this</b> flags a trap.</p>
+
+<h2>The dashboard</h2>
+<div class="stats">
+  <div class="stat"><div class="n">1</div><div class="d">Jira story · SC-10</div></div>
+  <div class="stat"><div class="n">1</div><div class="d">Coding-agent PR · #3</div></div>
+  <div class="stat"><div class="n">2</div><div class="d">Tracked findings · F1 + F2</div></div>
+  <div class="stat"><div class="n">8</div><div class="d">Stops on the trail</div></div>
+</div>
+
+<!--INDEX-->
+
+<h3>The two findings we follow</h3>
+<table class="trail">
+  <tr><th>ID</th><th>Finding</th><th>Where</th><th>Why it matters</th></tr>
+  <tr><td><span class="tag f1">F1 · SECURITY</span></td><td>SQL injection in the discount-code lookup (CWE-89)</td><td><code>services/orders/src/discounts.ts:20</code></td><td>Shopper-controlled text is interpolated into SQL. A crafted code can select any discount row.</td></tr>
+  <tr><td><span class="tag f2">F2 · BUG</span></td><td>Discount stored as a negative-quantity line and counted twice; fixed discounts are not capped</td><td><code>discounts.ts:29-30</code>, <code>:67-73</code>, <code>db.ts:17</code></td><td>Totals are wrong (a $65.00 cart nets $52.00 instead of $58.50, and a $15.00 cart nets −$25.00). The downstream fulfillment service breaks.</td></tr>
+</table>
+
+<h3>The home base</h3>
+<table>
+  <tr><th>Artifact</th><th>Link</th><th>Role</th></tr>
+  <tr><td>Jira story</td><td><a href="https://coderabbit-demo.atlassian.net/browse/SC-10">SC-10 Discount codes at checkout</a></td><td>The task, with success criteria S1–S10</td></tr>
+  <tr><td>Pull request</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3">mmani-demo-prs #3</a></td><td>Coding-agent delivery, branch <code>agent/discount-codes</code></td></tr>
+  <tr><td>Consumer repo</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs-consumer">mmani-demo-prs-consumer</a></td><td>Fulfillment and finance service broken by F2</td></tr>
+  <tr><td>Standards</td><td><a href="https://github.com/coderabbit-demo/coderabbit-standards/tree/main/commerce">coderabbit-standards/commerce</a></td><td>Order, discount, and data-access rules cited as Coding guidelines</td></tr>
+</table>
+<p>PR #3 is open, unmerged, and labeled <code>Demo - Do not merge</code>, <code>coding-agent</code>, and <code>showcase: all-in-one</code>. The defects are intentional. The application is a demo storefront with synthetic data; never deploy it publicly.</p>
+
+
+<h2 class="pb">Part I — The story: a ticket becomes a branch</h2>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 1</span>The developer receives SC-10</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://coderabbit-demo.atlassian.net/browse/SC-10">SC-10</a>. Scroll through Success criteria S1–S10 and the Acceptance criteria.</div>
+    <div class="say"><span class="lbl">Say</span>"Marketing wants promo codes for the autumn campaign. The ticket is precise: discounts live on the order, the net is never negative, codes are bound parameters. Our developer is busy, so they hand it to a coding agent."</div>
+    <div><span class="lbl">See</span>The story with S1 <i>Net never negative</i>, S3 <i>Lines unchanged</i>, S7 <i>No injectable SQL</i>. These are the exact criteria the agent will miss.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/01-jira-sc10.jpg"><figcaption>Jira SC-10 with numbered success criteria.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 2</span>The coding agent delivers a branch</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Show the branch <code>agent/discount-codes</code> locally (<code>git log --oneline -3</code>). It was produced from the ticket by a coding agent.</div>
+    <div class="say"><span class="lbl">Say</span>"The agent wrote the route, the database table, the cart field, and eight passing tests. Everything is green. Before I push this anywhere, I want a second pair of eyes."</div>
+    <div><span class="lbl">See</span>A green test run: <code>npm run check</code> passes 17 tests. Passing tests are not proof — two of them assert the wrong totals.</div>
+  </div>
+</div>
+
+<h2 class="pb">Part II — The walkthrough</h2>
+
+<h3>Stage 1 · Before the PR: CLI and VS Code</h3>
+<p class="small">Setup: <code>~/projects/mmani-demo-prs</code> on branch <code>agent/discount-codes</code>. The local branch <code>demo/agent-base</code> marks where the agent started, so the review shows only the agent's 13 files. Do not compare against <code>main</code>: it now holds the corrected reference implementation. Exact setup commands: <a href="#sec-appendix-c-local-setup-for-the-cli-and-v">Appendix C</a>.</p>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 3</span>Review committed changes with the CodeRabbit CLI</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>In a terminal, run:<pre>cd ~/projects/mmani-demo-prs
+coderabbit review --committed --base demo/agent-base</pre>To list the stored findings again: <code>coderabbit review findings</code></div>
+    <div class="say"><span class="lbl">Say</span>"Code exists, so review it now — before a PR, before a teammate spends time on it. The same engine that reviews PRs runs on my laptop."</div>
+    <div><span class="lbl">See</span><span class="tag f1">F1</span> Injection (CWE-89) at <code>discounts.ts:20</code>: "Bind the discount code in the lookup." <span class="tag f2">F2</span> "Limit the discount to the cart subtotal" (<code>discounts.ts:59</code>), and through the tests: "Do not assert a negative order total" and "Assert one deduction for the percent code" (5,200 should be 5,850).</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/17-cli-f1.jpg"><figcaption>CLI: F1, the SQL injection in the discount lookup.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/18-cli-f2-cap.jpg"><figcaption>CLI: F2, the uncapped discount, plus the interpolated UPDATE at line 73.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/19-cli-f2-tests.jpg"><figcaption>CLI: F2 through the agent's tests (negative total; double deduction).</figcaption></figure>
+
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 4</span>Inspect the same findings in VS Code</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Run <code>code ~/projects/mmani-demo-prs</code>. In the CodeRabbit panel, set the base to <code>demo/agent-base</code> and the scope to <b>Review committed changes</b>. Open the SQL finding, then the discount-line finding.</div>
+    <div class="say"><span class="lbl">Say</span>"Same findings, in my editor, next to the code. I can apply the suggestion or hand it back to the agent with Fix with AI."</div>
+    <div><span class="lbl">See</span>18 findings and <b>Fix all issues</b>. <span class="tag f1">F1</span> inline at line 20: "Bind the discount code in the lookup." <span class="tag f2">F2</span> in Comments: "Clamp the discount to the eligible subtotal" (Ln 59) and "Do not subtract the discount through an order line" (Ln 67-72). Leave fixes unapplied.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/20-vscode-f1-f2.jpg"><figcaption>VS Code: F1 inline on the query, F2 in the findings and Comments lists.</figcaption></figure>
+</div>
+
+<div class="call dont"><b class="t">Don't do this</b> Do not apply fixes locally during a recorded demo. The PR stops below depend on the defects staying in place.</div>
+
+<h3 class="pb">Stage 2 · The pull request</h3>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 5</span>Open PR #3 and read the summary</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3">PR #3</a>. Point at the agent note, Jira link, and labels.</div>
+    <div class="say"><span class="lbl">Say</span>"The developer pushed the agent's branch anyway. Now the whole team sees it — and CodeRabbit reviews it with more context than my laptop had: Jira, our org standards, and the repos that depend on this service."</div>
+    <div><span class="lbl">See</span>"Implemented by a coding agent from Jira SC-10", labels <code>coding-agent</code> and <code>Demo - Do not merge</code>.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/03-pr-overview.jpg"><figcaption>PR #3 header and description.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 6</span>Walkthrough and sequence diagram</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>In the CodeRabbit summary comment, expand <b>Walkthrough</b>. Scroll to the changes table and the sequence diagram.</div>
+    <div class="say"><span class="lbl">Say</span>"Before any finding: here is what changed, grouped by purpose, and the request path from the cart through the gateway to the orders database. It also noticed product sorting, which nobody asked for."</div>
+    <div><span class="lbl">See</span>Grouped changes (Discount Code Application; Product Sorting), Priority, review effort 3 (~25 min), and the Shopper → Cart → Gateway → OrdersApp → OrdersDB diagram.</div>
+  </div>
+  <figure class="shot"><div style="width:5.2in;margin:0 auto;aspect-ratio:796/950;overflow:hidden;border:1px solid var(--line);border-radius:4px"><img src="shots-jpg/02-pr-walkthrough.jpg" style="width:100%;max-height:none;border:0;border-radius:0"></div><figcaption>Walkthrough with layered changes.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/02b-pr-sequence-diagram.jpg"><figcaption>Sequence diagram: the discount request path from the cart to the orders database.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 7</span><span class="tag f1">F1</span> The SQL injection finding</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open the <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733137">discounts.ts:20 finding</a>.</div>
+    <div class="say"><span class="lbl">Say</span>"This is the same finding the CLI raised. Now it carries severity, category, reachability, exploitability, the CWE, a concrete exploit path, and the fix — bind the code as a parameter."</div>
+    <div><span class="lbl">See</span>Major · Security &amp; Privacy · CWE-89 · Reachability External · Exploitability Moderate · <i>View Security blast radius</i>.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/04-pr-sqli.jpg"><figcaption>F1 on the PR: anatomy of a security finding.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 8</span><span class="tag f2">F2</span> The money bug: counted twice, never capped</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open the <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733154">discounts.ts:73 finding</a>, then the <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733140">discounts.ts:30 finding</a>.</div>
+    <div class="say"><span class="lbl">Say</span>"The agent stored the discount twice — as a minus-one line and on the order — so a $65 cart with 10% off charges $52, not $58.50. And a $20 code on a $15 mug produces a negative total."</div>
+    <div><span class="lbl">See</span>"Subtract the discount only once" with the exact cents; "Cap a fixed discount at the eligible subtotal", Sources: Path instructions, Linked repositories.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/05-pr-double-discount.jpg"><figcaption>F2: the discount is subtracted twice.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/06-pr-negative-net.jpg"><figcaption>F2: uncapped fixed discount gives a negative net.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 9</span><span class="tag f2">F2</span> It breaks another repository</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open the <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733132">db.ts:17 finding</a>.</div>
+    <div class="say"><span class="lbl">Say</span>"To make its design fit, the agent relaxed a database constraint. CodeRabbit read the fulfillment repo: those minus-one lines become pick tasks and increase stock, and finance books them as SKU revenue."</div>
+    <div><span class="lbl">See</span>"Keep the physical-line quantity constraint." Sources: <b>Coding guidelines, Path instructions, Linked repositories</b>.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/07-pr-cross-repo.jpg"><figcaption>F2 reaches the linked consumer repository.</figcaption></figure>
+</div>
+<div class="call"><b class="t">WOW</b> Pause on the Sources line. One finding cites the org's coding standards (a separate repo), the path instructions in this repo's config, and the downstream repo it would break.</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 10</span>Pre-merge checks against Jira</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Scroll to <b>Pre-merge checks</b> in the summary comment. Expand <i>Success Criteria</i>.</div>
+    <div class="say"><span class="lbl">Say</span>"CodeRabbit read SC-10 and graded the PR against every success criterion — with file and line evidence. It also caught the out-of-scope sorting feature."</div>
+    <div><span class="lbl">See</span>6 errors · 1 warning: Linked Issues, Out of Scope, Security Gate, Jira Work Item, Success Criteria (S1–S10 Not met), Order Invariants; Docstring Coverage warning.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/08-pr-premerge-checks.jpg"><figcaption>Pre-merge checks, including the Jira success-criteria gate.</figcaption></figure>
+</div>
+<div class="call dont"><b class="t">Don't do this</b> Do not describe green CI as proof. CI passes because the agent's tests assert the wrong totals. The checks and the findings are different signals.</div>
+
+<h3 class="pb">Stage 3 · The reviewer: Triage and Change Stack</h3>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 11</span>Triage: where does PR #3 sit?</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://app.coderabbit.ai/triage?repo=mmani-demo-prs">Triage</a> filtered to <code>mmani-demo-prs</code>. Find PR #3 in the P3 column.</div>
+    <div class="say"><span class="lbl">Say</span>"As a reviewer I see the whole queue, prioritized, with risk and blast radius on every card. PR #3 tells me another role owns the next action — the author has merge conflicts to fix."</div>
+    <div><span class="lbl">See</span>P1/P2/P3 columns; PR #3 card with Medium risk, High blast radius, and "Fix merge conflicts".</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/10-triage-queue.jpg"><figcaption>Triage queue for mmani-demo-prs.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 12</span>Change Stack overview and layers</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview">Change Stack for PR #3</a>. Read the cards, then the layer rail.</div>
+    <div class="say"><span class="lbl">Say</span>"Seven functional layers instead of thirteen files. Six of them carry findings, and the overview tells me what blocks the merge."</div>
+    <div><span class="lbl">See</span>7 layers, 13 files, 16 findings (2 Critical, 13 Major); merge blockers; the layer rail with per-layer finding counts.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/11-cs-overview.jpg"><figcaption>Change Stack overview.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/12-cs-layers.jpg" style="max-height:4.2in"><figcaption>Layer rail.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 13</span><span class="tag f1">F1</span> The finding inside its layer</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Select layer 2, <i>Code lookup and discount calculation</i>.</div>
+    <div class="say"><span class="lbl">Say</span>"Same SQL injection, now in context: the lookup function, the interface it returns, and the finding pinned to line 20."</div>
+    <div><span class="lbl">See</span>The layer summary, the diff of <code>discounts.ts</code>, and F1 inline with its CWE and fix.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/13-cs-layer-sqli.jpg"><figcaption>F1 in Change Stack layer 2.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 14</span><span class="tag f1">F1</span> Security Blast Radius</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>From the F1 comment, click <b>View Security blast radius</b>. Select the highlighted lookup component.</div>
+    <div class="say"><span class="lbl">Say</span>"The vulnerable line is the start. Which components does it reach? The lookup feeds discount application and checkout reservation."</div>
+    <div><span class="lbl">See</span>7 changed, 3 upstream, 1 downstream, 1 potentially impacted; the F1 panel on the right with evidence.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/14-cs-blast-radius.jpg"><figcaption>Security Blast Radius graph for F1.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/15-cs-blast-radius-finding.jpg"><figcaption>F1 selected: highlighted component and finding detail.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 15</span><span class="tag f1">F1</span> <span class="tag f2">F2</span> Security architecture impact</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Click <b>Security architecture impact</b> in the rail. Then, on GitHub, expand <i>Security architecture risk</i> in the summary.</div>
+    <div class="say"><span class="lbl">Say</span>"Architecture view: customer input now crosses from the gateway into SQL in two services, and discount application is a new component writing order state. Both of our findings are listed as retained high concerns."</div>
+    <div><span class="lbl">See</span>Boundaries for web, gateway, catalog, orders, and the orders database; overall impact High risk. Retained concerns: SQL from shopper code (F1); negative and double-counted totals (F2).</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/16-cs-security-architecture.jpg"><figcaption>Security architecture impact in Change Stack.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/09-pr-security-architecture.jpg"><figcaption>Security architecture risk in the PR summary.</figcaption></figure>
+</div>
+
+<h3 class="pb">Stage 4 · QA Agent</h3>
+<p class="small">The QA Agent ran against the deployed demo environment on commit <code>e7a13a2</code>: 5 scenarios, 11 bugs, 16 m 56 s. All five scenarios failed. The two below carry F1 and F2.</p>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 16</span>Run the QA Agent on PR #3</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>On PR #3, comment <code>@coderabbitai test</code> (or open <b>QA Agent</b> in Change Stack and click <b>Run current plan</b>). For the prepared demo, open the existing run from the PR comment's <b>Review Evidence</b> button.</div>
+    <div class="say"><span class="lbl">Say</span>"Findings are claims. The QA Agent turns them into tests, runs them against the running app, and keeps the evidence."</div>
+    <div><span class="lbl">See</span>"At least one QA scenario demonstrated a regression." Run failed · 5 of 5 scenarios · 11 bugs, with testing limits stated plainly.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/21-qa-pr-summary.jpg" style="max-height:5in"><figcaption>QA Agent result on the PR.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/25-qa-run.jpg"><figcaption>The run in Change Stack: five scenarios, each with evidence.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 17</span><span class="tag f2">F2</span> The money bug, proven in the running app</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open scenario 2, <i>It preserves physical order lines and totals through discounted checkout</i>. Show <b>Evidence</b>, then <b>Checks</b> → Failed.</div>
+    <div class="say"><span class="lbl">Say</span>"Checkout worked — and that is the problem. The hoodie cart reports a 4,000-cent subtotal instead of 6,000, the fulfillment consumer receives a quantity of minus one, and the mug cart nets minus $25."</div>
+    <div><span class="lbl">See</span>Observed: "Discounted cart reported subtotal 4000 rather than 6000." "The mug cart net was -2500, below zero." Execution log linked to each check.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/22-qa-f2-evidence.jpg" style="max-height:5.4in"><figcaption>Scenario 2 evidence: execution result.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/23-qa-f2-checks.jpg" style="max-height:5.4in"><figcaption>Scenario 2 failed checks: double-counted subtotal and negative net.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 18</span><span class="tag f1">F1</span> The injection, exploited in the running app</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open scenario 3, <i>It rejects unauthorized discount and unsafe sorting requests</i>. Show <b>Checks</b> → Failed.</div>
+    <div class="say"><span class="lbl">Say</span>"This is F1 with proof. An injected code was accepted and applied someone else's discount. Same scenario: the SQL sort expression was accepted and a placed order was changed."</div>
+    <div><span class="lbl">See</span>Observed: "Injected code returned 200 and applied WELCOME10 for 600 cents." 7 failed assertions, each with an execution log.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/24-qa-f1-checks.jpg" style="max-height:5.4in"><figcaption>Scenario 3 failed checks: the injected code was accepted.</figcaption></figure>
+</div>
+<div class="call"><b class="t">WOW</b> The same two findings from the CLI are now reproduced against the running application, with expected versus observed values and execution logs.</div>
+
+<h3 class="pb">Stage 5 · Application Security: Deep Scan</h3>
+<p class="small">Deep Scan <code>2b10cbc0</code> of <code>agent/discount-codes</code>, October 28, 2026: 10 findings (1 high, 5 medium, 4 low). Scan the agent branch, not <code>main</code>: <code>main</code> holds the corrected code and does not contain F1.</p>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 19</span><span class="tag f1">F1</span> Deep Scan ranks the same injection highest</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open CodeRabbit Security → Repositories → <code>mmani-demo-prs</code> → Findings, with the agent-branch scan selected. Do not start a new scan during the demo.</div>
+    <div class="say"><span class="lbl">Say</span>"The security team doesn't read PRs. They scan the repository — and the one High finding is the same line we started with on my laptop."</div>
+    <div><span class="lbl">See</span>Injection · CWE-89 · <b>High</b> · <code>services/orders/src/discounts.ts:20</code>. Also <span class="tag f2">F2</span> as CWE-682 at <code>discounts.ts:66</code>, the negative discount line.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/28-deepscan-findings.jpg"><figcaption>Deep Scan findings for the agent branch.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 20</span><span class="tag f1">F1</span> Reachability from the public route to the sink</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Select the High injection finding. Scroll to <b>Reachability</b>.</div>
+    <div class="say"><span class="lbl">Say</span>"It traces the attack path: the public discount route on the gateway, the orders handler, the interpolated lookup, and where the attacker-selected discount gets written."</div>
+    <div><span class="lbl">See</span>Reachability External · Exploitability Moderate. Entry <code>gateway/src/app.ts:35</code> → <code>orders/src/app.ts:83</code> → <code>discounts.ts:20</code> → <code>discounts.ts:67</code>; sink <code>discounts.ts:20</code>.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/29-deepscan-f1.jpg" style="max-height:6.4in"><figcaption>F1 in Deep Scan: CWE, reachability, and evidence path.</figcaption></figure>
+</div>
+
+<h3 class="pb">Stage 6 · QA user journeys: same tests, two branches</h3>
+<p class="small">The QA Agent mapped nine critical user journeys from the repository's source and saved them as a reusable library under Testing → Test suites → <code>mmani-demo-prs</code>. The same library runs against any branch.</p>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 21</span>Map the journey library with an agent</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open Testing → Test suites → <code>mmani-demo-prs</code> → User journeys. For a new repo, click <b>Map with an Agent</b>, review the proposal, and reply "Apply all nine journeys."</div>
+    <div class="say"><span class="lbl">Say</span>"PR testing checks one change. Journeys check the product: browsing, carts, discounts, checkout, stock, privacy, and the fulfillment handoff — written once, run on every branch."</div>
+    <div><span class="lbl">See</span>Nine journeys, each with a user, a goal, test steps, and assertions grounded in the source.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/26-journeys-library.jpg" style="max-height:6in"><figcaption>The journey library for mmani-demo-prs.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 22</span>Baseline: all nine pass on <code>main</code></div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Set Branch to <code>main</code>. Show the latest run.</div>
+    <div class="say"><span class="lbl">Say</span>"On main — the corrected discount code — every journey passes. That is our baseline."</div>
+    <div><span class="lbl">See</span>All nine journeys Passed (run of Oct 28, 9:09 PM, commit <code>43b4219</code>).</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/30-journeys-main-passed.jpg" style="max-height:6in"><figcaption>All journeys pass on main.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 23</span><span class="tag f2">F2</span> Same journeys on the agent branch: five fail</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Set Branch to <code>agent/discount-codes</code>. Click <b>Test</b>, keep all nine journeys, and run (or show the existing run).</div>
+    <div class="say"><span class="lbl">Say</span>"Nothing about the tests changed — only the branch. Five journeys now fail, and every failure is about discounts."</div>
+    <div><span class="lbl">See</span>Bugs on: apply and replace discounts; recover from an invalid or expired discount; redeem fixed discounts; place an order; fulfillment and finance handoff. Browsing, cart editing, stock recovery, and privacy still pass.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/31-journeys-agent-bugs.jpg" style="max-height:6in"><figcaption>The same nine journeys on agent/discount-codes (run of Oct 28, 9:16 PM).</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 24</span><span class="tag f2">F2</span> Journey evidence: negative totals and a broken handoff</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <i>Redeem fixed discounts within customer and campaign limits</i> → View run, and open its storefront screenshot. Then open <i>Provide a placed order to fulfillment and finance</i>.</div>
+    <div class="say"><span class="lbl">Say</span>"Here is what a shopper actually sees: a $15 mug, a $20 code, and a total of minus $25. And the order the warehouse receives has a line with quantity minus one."</div>
+    <div><span class="lbl">See</span>"SAVE20 on a $15 mug produced a −$25 total." "Discounts were deducted twice from totals." Storefront: Subtotal −$5.00, Discount −$20.00, Total −$25.00. Fulfillment: "a synthetic line with quantity −1 … a $52.00 net instead of $58.50."</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/32-journey-fixed-discount.jpg"><figcaption>Fixed-discount journey: four product bugs, with recording and screenshot.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/33-journey-storefront-negative.jpg" style="max-height:3.6in"><figcaption>The storefront during the journey: a −$25.00 total.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/34-journey-fulfillment.jpg"><figcaption>Fulfillment handoff journey: quantity −1 line and a double-counted net.</figcaption></figure>
+</div>
+<div class="call"><b class="t">WOW</b> One journey library, written once from the source. On main it is green; on the agent branch it reproduces F2 from the shopper's screen to the warehouse's order feed.</div>
+
+
+<div class="call"><b class="t">The line that lands</b> "One ticket, one agent, two mistakes — and every stop saw them: my laptop, the PR, the reviewer's queue, the architecture view, the test run, and the security scan. Nothing reached main."</div>
+
+<h2 class="pb">Part III — Reference</h2>
+
+<h3>The finding trail</h3>
+<table class="trail">
+  <tr><th>Stop</th><th>F1 · SQL injection</th><th>F2 · Discount totals</th></tr>
+  <tr><td>CLI</td><td>CWE-89, <code>discounts.ts:20</code></td><td>Through the tests: <code>discounts.test.ts:26</code>, <code>:52-54</code></td></tr>
+  <tr><td>VS Code</td><td>Inline at <code>discounts.ts:20</code></td><td>Ln 59 (clamp), Ln 67-72 (order line)</td></tr>
+  <tr><td>PR review</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733137">CWE-89, Major</a></td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733154">:73</a>, <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733140">:30</a>, <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733132">db.ts:17</a></td></tr>
+  <tr><td>Pre-merge checks</td><td>Security Gate error; S7 Not met</td><td>Order Invariants error; S1–S3 Not met</td></tr>
+  <tr><td>Triage</td><td colspan="2">PR #3 card: Medium risk, High blast radius</td></tr>
+  <tr><td>Change Stack</td><td>Layer 2; Blast Radius; architecture impact</td><td>Layer 3; architecture impact (retained concern)</td></tr>
+  <tr><td>QA Agent</td><td>Scenario 3: injected code returned 200 and applied WELCOME10</td><td>Scenario 2: subtotal 4,000 vs 6,000; mug net −2,500; consumer line quantity −1</td></tr>
+  <tr><td>User journeys</td><td>—</td><td>5 of 9 journeys fail on the agent branch (all pass on main): −$25.00 storefront total; quantity −1 in the fulfillment feed</td></tr>
+  <tr><td>Deep Scan</td><td>High, CWE-89, <code>discounts.ts:20</code>, reachable from the gateway route</td><td>Medium, CWE-682, <code>discounts.ts:66</code></td></tr>
+</table>
+
+<h3>Objection handling</h3>
+<table>
+  <tr><th>Objection</th><th>Response</th></tr>
+  <tr><td>"Our tests pass, so it's fine."</td><td>The agent's tests assert −$25.00 and $52.00. Show the Success Criteria check: it requires tests that assert the values in the ticket.</td></tr>
+  <tr><td>"We already run SAST."</td><td>Keep it. F2 is not a SAST finding: it needs the ticket, the org's money rules, and the consumer repo to recognize.</td></tr>
+  <tr><td>"Does the check block the merge?"</td><td>The checks report errors. Branch protection must separately require them.</td></tr>
+  <tr><td>"Is the consumer actually deployed against this app?"</td><td>No. The verified moment is CodeRabbit reading the consumer's code and naming the broken call sites.</td></tr>
+</table>
+
+<h3>Freshness check before every demo</h3>
+<ol>
+  <li>PR #3 is open, unmerged, labeled <code>Demo - Do not merge</code>; F1 and F2 threads are unresolved.</li>
+  <li>The PR summary still shows Pre-merge checks with Success Criteria graded against SC-10.</li>
+  <li>The Blast Radius link on the F1 comment opens the graph (use the comment's link; the bare Change Stack tab may say it was not generated for the latest run).</li>
+  <li>Locally: branch <code>agent/discount-codes</code> and base <code>demo/agent-base</code> exist.</li>
+  <li>Do not push to <code>agent/discount-codes</code>; every push triggers a new review.</li>
+  <li>Deep Scan: show scan <code>2b10cbc0</code> (agent branch). A scan of <code>main</code> does not contain F1.</li>
+</ol>
+
+<h3 class="pb">Appendix A — Deep-link index</h3>
+<table>
+  <tr><th>Moment</th><th>Link</th></tr>
+  <tr><td>Jira story</td><td><a href="https://coderabbit-demo.atlassian.net/browse/SC-10">SC-10</a></td></tr>
+  <tr><td>Pull request</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3">PR #3</a></td></tr>
+  <tr><td>F1 on the PR</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733137">discussion_r4407733137</a></td></tr>
+  <tr><td>F2 on the PR</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733154">discussion_r4407733154</a>, <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733140">…140</a>, <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733132">…132</a></td></tr>
+  <tr><td>Triage</td><td><a href="https://app.coderabbit.ai/triage?repo=mmani-demo-prs">app.coderabbit.ai/triage?repo=mmani-demo-prs</a></td></tr>
+  <tr><td>Change Stack</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview">overview</a> · <a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/layers/2">layer 2</a></td></tr>
+  <tr><td>QA Agent run</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/qa-agent?qaRunId=b2070439-9e89-49bd-a484-5bcfe3dbdff6&amp;qaView=history">PR #3 QA run</a></td></tr>
+  <tr><td>Deep Scan</td><td><a href="https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&amp;repo=mmani-demo-prs&amp;tab=code&amp;scanId=2b10cbc0-68c6-404b-927b-7963e1ed70ab">scan 2b10cbc0 findings</a></td></tr>
+</table>
+
+<h3 class="pb">Appendix B — Focused PRs for single-feature demos</h3>
+<table>
+  <tr><th>PR</th><th>Feature</th><th>Jira</th></tr>
+  <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/4">#4</a> Order history · <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/11">#11</a> docstrings</td><td>Walkthrough; Chat (generate docstrings)</td><td>SC-11</td></tr>
+  <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/5">#5</a> Keep fixed discounts</td><td>Functional bug (negative net)</td><td>SC-13</td></tr>
+  <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/6">#6</a> Drop write lock</td><td>Data integrity (non-atomic redemption)</td><td>SC-14</td></tr>
+  <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/7">#7</a> Receipt lines</td><td>Cross-repo breaking change</td><td>SC-15</td></tr>
+  <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/8">#8</a> Low-stock badge</td><td>Issue validation; out of scope</td><td>SC-17</td></tr>
+</table>
+
+
+<h3 class="pb">Appendix C — Local setup for the CLI and VS Code demos</h3>
+<p>Steps 3 and 4 review the coding agent's branch on your laptop. The branch must be checked out, and the review must compare it against the commit the agent started from — not <code>main</code>, which now holds the corrected reference implementation. Run every command from a terminal; nothing here pushes or changes the shared repository.</p>
+
+<h4>1. Prerequisites</h4>
+<ul>
+  <li>Git and GitHub access to <code>coderabbit-demo/mmani-demo-prs</code> (public).</li>
+  <li>CodeRabbit CLI installed (see <a href="https://docs.coderabbit.ai/cli">docs.coderabbit.ai/cli</a>) and VS Code with the CodeRabbit extension.</li>
+  <li>Signed in to the <b>coderabbit-demo</b> organization in both.</li>
+</ul>
+<pre>coderabbit auth login
+coderabbit auth status        # Account and organization
+coderabbit auth org           # switch to coderabbit-demo if needed
+coderabbit doctor             # checks the CLI is ready for local reviews
+code --install-extension coderabbit.coderabbit-vscode</pre>
+
+<h4>2. Clone the repository and check out the agent's branch</h4>
+<pre>cd ~/projects
+git clone https://github.com/coderabbit-demo/mmani-demo-prs.git
+cd mmani-demo-prs
+git switch agent/discount-codes
+git log --oneline -1          # expect: e7a13a2 Merge branch 'main' into agent/discount-codes</pre>
+<p class="small">Already cloned? Run <code>git fetch origin</code> and then <code>git switch agent/discount-codes &amp;&amp; git pull --ff-only</code>.</p>
+
+<h4>3. Create the comparison base</h4>
+<p>The base is the commit where the agent's branch and <code>main</code> last met. Create a local branch for it so both tools can select it by name.</p>
+<pre>git branch -f demo/agent-base "$(git merge-base origin/agent/discount-codes origin/main)"
+git rev-parse --short demo/agent-base               # expect: df75131
+git diff --stat demo/agent-base..HEAD | tail -1     # expect: 13 files changed, 251 insertions(+), 13 deletions(-)</pre>
+<p class="small"><code>demo/agent-base</code> is local only. Never push it.</p>
+
+<h4>4. Run the CLI review (Step 3)</h4>
+<pre>coderabbit review --committed --base demo/agent-base
+coderabbit review findings    # list the stored findings again without a new review</pre>
+<p class="small">Expect F1 at <code>services/orders/src/discounts.ts:20</code> and F2 at <code>discounts.ts:59</code> and in <code>tests/discounts.test.ts</code>. Exact wording varies between runs.</p>
+
+<h4>5. Run the VS Code review (Step 4)</h4>
+<pre>code ~/projects/mmani-demo-prs</pre>
+<ol>
+  <li>Open the CodeRabbit panel in the activity bar.</li>
+  <li>Check <b>Current</b> shows <code>agent/discount-codes</code>.</li>
+  <li>Click the pencil next to <b>Compare against</b> and choose <code>demo/agent-base</code>. Do not leave it on <code>origin/main</code>.</li>
+  <li>Set <b>Changes to review</b> to <b>Committed changes</b> (<b>All changes</b> is equivalent while the working tree is clean).</li>
+  <li>Click <b>Review</b>. Expect about 18 findings, with F1 inline at line 20.</li>
+</ol>
+
+<h4>6. Reset after a rehearsal</h4>
+<p>If you applied a suggestion or used Fix with AI locally, discard it before the next demo. This only affects your local checkout.</p>
+<pre>git status --short                         # see what changed
+git restore --staged --worktree .          # discard edits to tracked files
+git switch agent/discount-codes
+git reset --hard origin/agent/discount-codes</pre>
+<p class="small">Do not push from this checkout. Any push to <code>agent/discount-codes</code> triggers a new PR review on PR #3.</p>
+
+</body>
+</html>
