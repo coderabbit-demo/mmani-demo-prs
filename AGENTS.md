@@ -29,4 +29,5 @@ not weaken database `CHECK` constraints.
 - `npm run check` passes, with tests that assert the intended behavior (not whatever the code
   currently returns).
 - Exported functions have a doc comment.
-- The PR links its issue (`Closes #N`) and explains any deviation from it.
+- The PR references its Jira work item (`SC-N`, project ShoppingCart) and explains any
+  deviation from it.
