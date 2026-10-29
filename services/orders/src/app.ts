@@ -23,6 +23,7 @@ import {
   markPlaced,
   removeLine,
   setLine,
+  withReceiptLines,
 } from "./orders.ts";
 
 export interface OrdersAppDeps {
@@ -59,7 +60,7 @@ export function createOrdersApp({ db, catalog, auth, fulfillmentUrl }: OrdersApp
     const order =
       caller.kind === "service" ? getOrder(db, orderId) : getOwnedOrder(db, orderId, caller.customerId);
     if (!order) throw new HttpError(404, "Order not found");
-    res.json(order);
+    res.json(withReceiptLines(order));
   });
 
   app.put("/orders/:orderId/lines/:sku", async (req, res) => {
