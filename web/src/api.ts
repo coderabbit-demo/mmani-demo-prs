@@ -23,7 +23,7 @@ async function request<T>(token: string | null, path: string, init: RequestInit 
 
 export const api = {
   shoppers: () => request<Shopper[]>(null, "/shoppers"),
-  products: (token: string) => request<Product[]>(token, "/products"),
+  products: (token: string, sort = "name") => request<Product[]>(token, `/products?sort=${sort}`),
   createOrder: (token: string) => request<Order>(token, "/orders", { method: "POST" }),
   setLine: (token: string, orderId: string, sku: string, quantity: number) =>
     request<Order>(token, `/orders/${orderId}/lines/${sku}`, {
@@ -32,6 +32,11 @@ export const api = {
     }),
   removeLine: (token: string, orderId: string, sku: string) =>
     request<Order>(token, `/orders/${orderId}/lines/${sku}`, { method: "DELETE" }),
+  applyDiscount: (token: string, orderId: string, code: string) =>
+    request<Order>(token, `/orders/${orderId}/discount`, {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    }),
   checkout: (token: string, orderId: string) =>
     request<Order>(token, `/orders/${orderId}/checkout`, { method: "POST" }),
 };

@@ -13,6 +13,7 @@ import {
   type InternalAuthOptions,
 } from "../../../packages/service-kit/src/internalAuth.ts";
 import type { CatalogClient } from "./catalogClient.ts";
+import { applyDiscountCode } from "./discounts.ts";
 import { notifyOrderPlaced } from "./fulfillment.ts";
 import {
   assertCart,
@@ -79,11 +80,20 @@ export function createOrdersApp({ db, catalog, auth, fulfillmentUrl }: OrdersApp
     res.json(getOrder(db, order.id));
   });
 
+  app.post("/orders/:orderId/discount", async (req, res) => {
+    const order = getOwnedOrder(db, requireId(req.params.orderId, "order id"), customerId(res));
+    const code = req.body?.code;
+    if (typeof code !== "string" || code.trim() === "") throw new HttpError(400, "code is required");
+    res.json(await applyDiscountCode(db, order, code, catalog));
+  });
+
   app.post("/orders/:orderId/checkout", async (req, res) => {
     const order = getOwnedOrder(db, requireId(req.params.orderId, "order id"), customerId(res));
     assertCart(order);
     if (order.lines.length === 0) throw new HttpError(422, "Cart is empty");
-    await catalog.reserve(order.lines.map(({ sku, quantity }) => ({ sku, quantity })));
+    // Discount adjustment lines are not physical stock.
+    const stockLines = order.lines.filter((line) => line.quantity > 0);
+    await catalog.reserve(stockLines.map(({ sku, quantity }) => ({ sku, quantity })));
     markPlaced(db, order.id);
     await notifyOrderPlaced(fulfillmentUrl, order.id);
     res.json(getOrder(db, order.id));

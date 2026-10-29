@@ -22,7 +22,8 @@ export function createCatalogApp(db: DatabaseSync, auth: InternalAuthOptions) {
 
   app.get("/products", (req, res) => {
     const category = typeof req.query.category === "string" ? req.query.category : undefined;
-    res.json(listProducts(db, category));
+    const sort = typeof req.query.sort === "string" ? req.query.sort : undefined;
+    res.json(listProducts(db, category, sort));
   });
 
   app.get("/products/:sku", (req, res) => {

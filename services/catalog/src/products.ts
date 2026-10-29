@@ -22,14 +22,15 @@ function toProduct(row: ProductRow): Product {
 
 const CATEGORIES = new Set<string>(["apparel", "drinkware", "accessories"]);
 
-/** All products, optionally limited to one category, in name order. */
-export function listProducts(db: DatabaseSync, category?: string): Product[] {
+/** All products, optionally limited to one category, sorted by a column (default name). */
+export function listProducts(db: DatabaseSync, category?: string, sort = "name"): Product[] {
   if (category !== undefined && !CATEGORIES.has(category)) {
     throw new HttpError(400, "Unknown category");
   }
+  const orderBy = `ORDER BY ${sort}`;
   const rows = category
-    ? db.prepare("SELECT * FROM products WHERE category = ? ORDER BY name").all(category)
-    : db.prepare("SELECT * FROM products ORDER BY name").all();
+    ? db.prepare(`SELECT * FROM products WHERE category = ? ${orderBy}`).all(category)
+    : db.prepare(`SELECT * FROM products ${orderBy}`).all();
   return (rows as unknown as ProductRow[]).map(toProduct);
 }
 
