@@ -30,6 +30,8 @@
   .dss .head, .dss .cols { break-inside: avoid; }
   .dss { break-before: page; }
   h2 + .dss, h3 + .dss, p.small + .dss { break-before: auto; }
+  h2, h3 { break-before: page; }
+  h2 + h3 { break-before: auto; }
   h4 { font-size: 11pt; margin: 14pt 0 4pt; break-after: avoid; }
   .dss .head { break-after: avoid; }
   .shot { break-inside: avoid; margin: 0; padding: 8pt 10pt 10pt; border-top: 1px solid var(--line); background: #fff; }
@@ -394,15 +396,6 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <tr><td>QA Agent</td><td>Scenario 3: injected code returned 200 and applied WELCOME10</td><td>Scenario 2: subtotal 4,000 vs 6,000; mug net −2,500; consumer line quantity −1</td></tr>
   <tr><td>User journeys</td><td>—</td><td>5 of 9 journeys fail on the agent branch (all pass on main): −$25.00 storefront total; quantity −1 in the fulfillment feed</td></tr>
   <tr><td>Deep Scan</td><td>High, CWE-89, <code>discounts.ts:20</code>, reachable from the gateway route</td><td>Medium, CWE-682, <code>discounts.ts:66</code></td></tr>
-</table>
-
-<h3>Objection handling</h3>
-<table>
-  <tr><th>Objection</th><th>Response</th></tr>
-  <tr><td>"Our tests pass, so it's fine."</td><td>The agent's tests assert −$25.00 and $52.00. Show the Success Criteria check: it requires tests that assert the values in the ticket.</td></tr>
-  <tr><td>"We already run SAST."</td><td>Keep it. F2 is not a SAST finding: it needs the ticket, the org's money rules, and the consumer repo to recognize.</td></tr>
-  <tr><td>"Does the check block the merge?"</td><td>The checks report errors. Branch protection must separately require them.</td></tr>
-  <tr><td>"Is the consumer actually deployed against this app?"</td><td>No. The verified moment is CodeRabbit reading the consumer's code and naming the broken call sites.</td></tr>
 </table>
 
 <h3>Freshness check before every demo</h3>
