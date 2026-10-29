@@ -36,6 +36,14 @@ export function createCatalogClient(options: CatalogClientOptions) {
       return (await res.json()) as Product;
     },
 
+    /** SKUs in a catalog category, used for category-restricted discount codes. */
+    async skusInCategory(category: string): Promise<Set<string>> {
+      const res = await call(`/products?category=${encodeURIComponent(category)}`);
+      if (!res.ok) throw new HttpError(502, `Catalog returned ${res.status}`);
+      const products = (await res.json()) as Product[];
+      return new Set(products.map((product) => product.sku));
+    },
+
     async reserve(lines: ReservationLine[]): Promise<void> {
       const res = await call("/reservations", { method: "POST", body: JSON.stringify({ lines }) });
       if (res.status === 409) {

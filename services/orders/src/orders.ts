@@ -8,6 +8,7 @@ interface OrderRow {
   id: string;
   customer_id: string;
   status: OrderStatus;
+  discount_code: string | null;
   discount_cents: number;
   placed_at: string | null;
 }
@@ -52,6 +53,7 @@ export function getOrder(db: DatabaseSync, id: string): Order | undefined {
     status: row.status,
     lines,
     totals: computeTotals(lines, row.discount_cents),
+    discountCode: row.discount_code,
     placedAt: row.placed_at,
   };
 }

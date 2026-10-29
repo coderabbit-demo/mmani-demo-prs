@@ -13,6 +13,7 @@ import {
   type InternalAuthOptions,
 } from "../../../packages/service-kit/src/internalAuth.ts";
 import type { CatalogClient } from "./catalogClient.ts";
+import { applyDiscountCode, recalculateDiscount } from "./discounts.ts";
 import { notifyOrderPlaced } from "./fulfillment.ts";
 import {
   assertCart,
@@ -69,14 +70,21 @@ export function createOrdersApp({ db, catalog, auth, fulfillmentUrl }: OrdersApp
     const product = await catalog.getProduct(sku);
     if (!product) throw new HttpError(404, "Product not found");
     setLine(db, order.id, { sku, name: product.name, quantity, unitPriceCents: product.priceCents });
+    await recalculateDiscount(db, order.id, catalog);
     res.json(getOrder(db, order.id));
   });
 
-  app.delete("/orders/:orderId/lines/:sku", (req, res) => {
+  app.delete("/orders/:orderId/lines/:sku", async (req, res) => {
     const order = getOwnedOrder(db, requireId(req.params.orderId, "order id"), customerId(res));
     assertCart(order);
     removeLine(db, order.id, requireSku(req.params.sku));
+    await recalculateDiscount(db, order.id, catalog);
     res.json(getOrder(db, order.id));
+  });
+
+  app.post("/orders/:orderId/discount", async (req, res) => {
+    const order = getOwnedOrder(db, requireId(req.params.orderId, "order id"), customerId(res));
+    res.json(await applyDiscountCode(db, order, req.body?.code, catalog));
   });
 
   app.post("/orders/:orderId/checkout", async (req, res) => {

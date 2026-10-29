@@ -90,6 +90,7 @@ export function App() {
             quantity >= 1 && void run(() => api.setLine(token!, order!.id, sku, quantity))
           }
           onRemove={(sku) => void run(() => api.removeLine(token!, order!.id, sku))}
+          onApplyCode={(code) => void run(() => api.applyDiscount(token!, order!.id, code))}
           onCheckout={() =>
             void run(async () => {
               const placed = await api.checkout(token!, order!.id);

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Order } from "../../packages/contracts/src/orders.ts";
 import { formatCents } from "./api.ts";
 
@@ -7,9 +8,11 @@ interface CartProps {
   onQuantity(sku: string, quantity: number): void;
   onRemove(sku: string): void;
   onCheckout(): void;
+  onApplyCode(code: string): void;
 }
 
-export function Cart({ order, busy, onQuantity, onRemove, onCheckout }: CartProps) {
+export function Cart({ order, busy, onQuantity, onRemove, onCheckout, onApplyCode }: CartProps) {
+  const [code, setCode] = useState("");
   if (!order || order.lines.length === 0) {
     return (
       <aside className="cart" aria-label="Cart">
@@ -53,13 +56,31 @@ export function Cart({ order, busy, onQuantity, onRemove, onCheckout }: CartProp
         <dd>{formatCents(order.totals.subtotalCents)}</dd>
         {order.totals.discountCents > 0 && (
           <>
-            <dt>Discount</dt>
+            <dt>Discount{order.discountCode ? ` (${order.discountCode})` : ""}</dt>
             <dd>−{formatCents(order.totals.discountCents)}</dd>
           </>
         )}
         <dt className="net">Total</dt>
         <dd className="net">{formatCents(order.totals.netCents)}</dd>
       </dl>
+      {editable && (
+        <form
+          className="code"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onApplyCode(code);
+          }}
+        >
+          <input
+            aria-label="Discount code"
+            placeholder="Discount code"
+            value={code}
+            disabled={busy}
+            onChange={(e) => setCode(e.target.value)}
+          />
+          <button disabled={busy || code.trim() === ""}>Apply</button>
+        </form>
+      )}
       {editable && (
         <button className="primary" disabled={busy} onClick={onCheckout}>
           Place order

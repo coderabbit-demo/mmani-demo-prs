@@ -32,6 +32,11 @@ export const api = {
     }),
   removeLine: (token: string, orderId: string, sku: string) =>
     request<Order>(token, `/orders/${orderId}/lines/${sku}`, { method: "DELETE" }),
+  applyDiscount: (token: string, orderId: string, code: string) =>
+    request<Order>(token, `/orders/${orderId}/discount`, {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    }),
   checkout: (token: string, orderId: string) =>
     request<Order>(token, `/orders/${orderId}/checkout`, { method: "POST" }),
 };

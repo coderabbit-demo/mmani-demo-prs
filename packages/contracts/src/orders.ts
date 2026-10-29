@@ -22,7 +22,7 @@ export interface OrderLine {
 
 export interface OrderTotals {
   subtotalCents: number;
-  /** Order-level promotion amount. Reserved; always 0 until promotions ship. */
+  /** Order-level discount, `0..subtotalCents`. */
   discountCents: number;
   netCents: number;
 }
@@ -33,7 +33,13 @@ export interface Order {
   status: OrderStatus;
   lines: OrderLine[];
   totals: OrderTotals;
+  /** Discount code applied to the order, if any. */
+  discountCode: string | null;
   placedAt: string | null;
+}
+
+export interface ApplyDiscountRequest {
+  code: string;
 }
 
 export interface AddLineRequest {
