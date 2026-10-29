@@ -97,9 +97,8 @@ function releaseRedemption(db: DatabaseSync, orderId: string, code: string): voi
  * - Re-applying the code already on the order is a no-op.
  * - A different code replaces the current one and releases its redemption.
  * - Fixed-amount codes can be redeemed once per customer, across all carts.
- * - The redemption is reserved with a conditional increment in the same
- *   transaction as the order update, so `max_redemptions` holds under
- *   concurrency and a failure leaves nothing behind.
+ * - `max_redemptions` is checked against the current count before the
+ *   redemption is recorded.
  */
 export async function applyDiscountCode(
   db: DatabaseSync,
@@ -115,39 +114,35 @@ export async function applyDiscountCode(
 
   const amountCents = discountCentsFor(code, order.lines, await eligibleSkus(code, catalog));
 
-  db.exec("BEGIN IMMEDIATE");
-  try {
-    if (order.discountCode) releaseRedemption(db, order.id, order.discountCode);
+  // Each statement below is a single-row write, so we no longer hold an
+  // IMMEDIATE transaction (which serialized every checkout during the campaign).
+  if (order.discountCode) releaseRedemption(db, order.id, order.discountCode);
 
-    if (code.kind === "fixed") {
-      const used = db
-        .prepare("SELECT 1 FROM discount_redemptions WHERE code = ? AND customer_id = ?")
-        .get(code.code, order.customerId);
-      if (used) throw new HttpError(409, "You have already used this code");
-    }
-
-    const reserved = db
-      .prepare(
-        `UPDATE discount_codes SET times_redeemed = times_redeemed + 1
-         WHERE code = ? AND (max_redemptions IS NULL OR times_redeemed < max_redemptions)`,
-      )
-      .run(code.code);
-    if (reserved.changes !== 1) throw new HttpError(409, "Discount code has been fully redeemed");
-
-    db.prepare(
-      "INSERT INTO discount_redemptions (order_id, code, customer_id, redeemed_at) VALUES (?, ?, ?, ?)",
-    ).run(order.id, code.code, order.customerId, new Date().toISOString());
-
-    const updated = db
-      .prepare("UPDATE orders SET discount_code = ?, discount_cents = ? WHERE id = ? AND status = 'cart'")
-      .run(code.code, amountCents, order.id);
-    if (updated.changes !== 1) throw new HttpError(409, "Order is no longer editable");
-
-    db.exec("COMMIT");
-  } catch (err) {
-    db.exec("ROLLBACK");
-    throw err;
+  if (code.kind === "fixed") {
+    const used = db
+      .prepare("SELECT 1 FROM discount_redemptions WHERE code = ? AND customer_id = ?")
+      .get(code.code, order.customerId);
+    if (used) throw new HttpError(409, "You have already used this code");
   }
+
+  const current = findDiscountCode(db, code.code)!;
+  if (current.maxRedemptions !== null && current.timesRedeemed >= current.maxRedemptions) {
+    throw new HttpError(409, "Discount code has been fully redeemed");
+  }
+  db.prepare("UPDATE discount_codes SET times_redeemed = ? WHERE code = ?").run(
+    current.timesRedeemed + 1,
+    code.code,
+  );
+
+  db.prepare(
+    "INSERT INTO discount_redemptions (order_id, code, customer_id, redeemed_at) VALUES (?, ?, ?, ?)",
+  ).run(order.id, code.code, order.customerId, new Date().toISOString());
+
+  const updated = db
+    .prepare("UPDATE orders SET discount_code = ?, discount_cents = ? WHERE id = ? AND status = 'cart'")
+    .run(code.code, amountCents, order.id);
+  if (updated.changes !== 1) throw new HttpError(409, "Order is no longer editable");
+
   return getOrder(db, order.id)!;
 }
 
