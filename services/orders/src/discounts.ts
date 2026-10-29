@@ -153,7 +153,8 @@ export async function applyDiscountCode(
 
 /**
  * Re-price the discount after a cart's lines change. The redemption itself is
- * unchanged; only the amount follows the new eligible subtotal.
+ * unchanged. Percent codes follow the new eligible subtotal; a fixed-amount
+ * code keeps the amount the shopper was promised.
  */
 export async function recalculateDiscount(
   db: DatabaseSync,
@@ -164,6 +165,7 @@ export async function recalculateDiscount(
   if (!order?.discountCode) return;
   const code = findDiscountCode(db, order.discountCode);
   if (!code) return;
-  const amountCents = discountCentsFor(code, order.lines, await eligibleSkus(code, catalog));
+  const amountCents =
+    code.kind === "fixed" ? code.value : discountCentsFor(code, order.lines, await eligibleSkus(code, catalog));
   db.prepare("UPDATE orders SET discount_cents = ? WHERE id = ? AND status = 'cart'").run(amountCents, orderId);
 }
