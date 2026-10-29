@@ -64,8 +64,9 @@ reviews:
       requirements: "Use Conventional Commits, e.g. 'feat(orders): add discount codes'."
     description:
       mode: warning
+    # Validates the PR against its linked Jira work item (project SC).
     issue_assessment:
-      mode: warning
+      mode: error
     custom_checks:
       - name: "Security Gate"
         mode: error
@@ -73,6 +74,13 @@ reviews:
           Fail only when the review finds a major or critical SECURITY issue in this PR, such
           as SQL injection, broken access control, secrets in code, or SSRF. Do not fail on
           functional or style issues.
+      - name: "Jira Work Item"
+        mode: error
+        instructions: >-
+          Pass only when the PR title or description references a Jira work item in the SC
+          project (for example SC-123) and the change stays within that work item's scope.
+          Fail when no SC key is referenced, or when the PR includes changes the work item
+          does not ask for; list those changes.
       - name: "Order Invariants"
         mode: error
         instructions: >-
@@ -93,6 +101,10 @@ knowledge_base:
     scope: auto
   issues:
     scope: auto
+  jira:
+    usage: enabled
+    project_keys:
+      - "SC"
   pull_requests:
     scope: auto
   code_guidelines:
