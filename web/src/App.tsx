@@ -5,6 +5,11 @@ import { api, formatCents, type Shopper } from "./api.ts";
 import { Cart } from "./Cart.tsx";
 import { OrderHistory } from "./OrderHistory.tsx";
 
+/**
+ * Render the storefront, cart and order history for the selected demo shopper.
+ * Load products and placed-order history when the shopper changes and refresh
+ * both after checkout. Display request failures in the storefront's error banner.
+ */
 export function App() {
   const [shoppers, setShoppers] = useState<Shopper[]>([]);
   const [token, setToken] = useState<string | null>(null);

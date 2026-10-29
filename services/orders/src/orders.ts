@@ -99,6 +99,13 @@ export function markPlaced(db: DatabaseSync, orderId: string): void {
   );
 }
 
+/**
+ * Return this customer's orders with the requested status, newest first by
+ * placement date, falling back to creation date for orders without one.
+ * Each summary counts total units across lines and reports the net total in
+ * cents after the stored order discount. Returns an empty array if none match.
+ * Database errors propagate to the caller.
+ */
 export function listOrders(db: DatabaseSync, customerId: string, status: OrderStatus): OrderSummary[] {
   const ids = db
     .prepare("SELECT id FROM orders WHERE customer_id = ? AND status = ? ORDER BY COALESCE(placed_at, created_at) DESC")
