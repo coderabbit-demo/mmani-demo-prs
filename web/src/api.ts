@@ -24,6 +24,10 @@ async function request<T>(token: string | null, path: string, init: RequestInit 
 export const api = {
   shoppers: () => request<Shopper[]>(null, "/shoppers"),
   products: (token: string) => request<Product[]>(token, "/products"),
+  /**
+   * Fetch the bearer-token shopper's placed-order summaries, newest first.
+   * Reject with ApiError on a non-success HTTP response; network failures propagate.
+   */
   orderHistory: (token: string) => request<OrderSummary[]>(token, "/orders?status=placed"),
   createOrder: (token: string) => request<Order>(token, "/orders", { method: "POST" }),
   setLine: (token: string, orderId: string, sku: string, quantity: number) =>

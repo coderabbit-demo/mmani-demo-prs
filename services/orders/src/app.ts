@@ -33,6 +33,13 @@ export interface OrdersAppDeps {
   fulfillmentUrl?: string;
 }
 
+/**
+ * Create the orders HTTP app with the supplied database, catalog client and auth.
+ * The order-list route accepts cart, placed or cancelled status (default: placed)
+ * and returns only the authenticated customer's summaries; trusted service callers
+ * receive 403. Invalid statuses receive 400. HTTP errors become JSON responses
+ * with their status; unexpected errors become generic 500 responses.
+ */
 export function createOrdersApp({ db, catalog, auth, fulfillmentUrl }: OrdersAppDeps) {
   const app = express();
   app.use(express.json({ limit: "16kb" }));

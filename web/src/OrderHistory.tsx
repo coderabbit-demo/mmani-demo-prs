@@ -1,6 +1,11 @@
 import type { OrderSummary } from "../../packages/contracts/src/orders.ts";
 import { formatCents } from "./api.ts";
 
+/**
+ * Render summaries in the supplied order, or an empty-history message.
+ * Show placement dates in the browser's locale, using a dash for missing dates,
+ * alongside net totals in USD, unit counts and order IDs.
+ */
 export function OrderHistory({ orders }: { orders: OrderSummary[] }) {
   return (
     <section className="history" aria-label="Order history">
