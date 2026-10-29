@@ -47,3 +47,8 @@ button.link { border: none; background: none; color: var(--muted); padding: 0; m
 .code { display: flex; gap: 8px; margin-top: 16px; }
 .code input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
 .code button { margin-top: 0; }
+.side { display: grid; gap: 16px; align-content: start; }
+.history { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.history h2 { margin-top: 0; }
+.history ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.history li { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; }

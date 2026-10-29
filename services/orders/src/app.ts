@@ -20,6 +20,7 @@ import {
   createOrder,
   getOrder,
   getOwnedOrder,
+  listOrders,
   markPlaced,
   removeLine,
   setLine,
@@ -51,6 +52,14 @@ export function createOrdersApp({ db, catalog, auth, fulfillmentUrl }: OrdersApp
 
   app.post("/orders", (_req, res) => {
     res.status(201).json(createOrder(db, customerId(res)));
+  });
+
+  const STATUSES = new Set(["cart", "placed", "cancelled"]);
+
+  app.get("/orders", (req, res) => {
+    const status = req.query.status ?? "placed";
+    if (typeof status !== "string" || !STATUSES.has(status)) throw new HttpError(400, "Invalid status");
+    res.json(listOrders(db, customerId(res), status as "cart" | "placed" | "cancelled"));
   });
 
   app.get("/orders/:orderId", (req, res) => {
