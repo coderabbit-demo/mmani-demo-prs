@@ -59,7 +59,7 @@
 
 <div class="kicker">Internal · Do / Say / See runbook · CodeRabbit Field Engineering Enablement</div>
 <h1>Follow one finding: from Jira ticket to Deep Scan</h1>
-<p class="lede">A single feature, written by a coding agent, followed end to end: local review in the CLI and VS Code, the pull request review, Triage, Change Stack, QA Agent, the Security Deep Scan, and QA user journeys. The same two findings appear at every stop. Demo repository <code>coderabbit-demo/mmani-demo-prs</code>, PR #3, Jira story SC-10. Captured October 28, 2026, in light mode. Allow about 25 minutes plus questions.</p>
+<p class="lede">A single feature, written by a coding agent, followed end to end: local review in the CLI and VS Code, the pull request review, Triage, Change Stack, QA Agent, the Security Deep Scan and Attack Surface, Fix with AI, and QA user journeys. The same two findings appear at every stop. Demo repository <code>coderabbit-demo/mmani-demo-prs</code>, PR #3, Jira story SC-10. Captured October 28, 2026, in light mode. Allow about 30 minutes plus questions.</p>
 
 <div class="call"><b class="t">Open with this</b> "One Jira ticket, one coding agent, one branch. Let's follow two things the agent got wrong — a security hole and a money bug — from the developer's laptop all the way to the security team's scan. Same findings, every stop."</div>
 
@@ -78,7 +78,7 @@
   <div class="stat"><div class="n">1</div><div class="d">Jira story · SC-10</div></div>
   <div class="stat"><div class="n">1</div><div class="d">Coding-agent PR · #3</div></div>
   <div class="stat"><div class="n">2</div><div class="d">Tracked findings · F1 + F2</div></div>
-  <div class="stat"><div class="n">8</div><div class="d">Stops on the trail</div></div>
+  <div class="stat"><div class="n">10</div><div class="d">Stops on the trail</div></div>
 </div>
 
 <!--INDEX-->
@@ -310,7 +310,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 </div>
 <div class="call"><b class="t">WOW</b> The same two findings from the CLI are now reproduced against the running application, with expected versus observed values and execution logs.</div>
 
-<h3 class="pb">Stage 5 · Application Security: Deep Scan</h3>
+<h3 class="pb">Stage 5 · Application Security: Deep Scan and Attack Surface</h3>
 <p class="small">Deep Scan <code>2b10cbc0</code> of <code>agent/discount-codes</code>, October 28, 2026: 10 findings (1 high, 5 medium, 4 low). Scan the agent branch, not <code>main</code>: <code>main</code> holds the corrected code and does not contain F1.</p>
 
 <div class="dss">
@@ -324,7 +324,35 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 </div>
 
 <div class="dss">
-  <div class="head"><span class="step">STEP 20</span><span class="tag f1">F1</span> Reachability from the public route to the sink</div>
+  <div class="head"><span class="step">STEP 20</span><span class="tag f1">F1</span> The attack surface map puts F1 in the Sinks lane</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Click the <b>Attack surface</b> tab. Point at the four headline numbers, then at the Trust &amp; Guardrails lanes.</div>
+    <div class="say"><span class="lbl">Say</span>"Findings tell you what's wrong. The attack surface tells you where it sits: every entry point, trust boundary, access control, and sink the scan mapped, and which of them carry findings. One red tile stands out, in the Sinks lane of the services row."</div>
+    <div><span class="lbl">See</span>94 mapped points, 100% verified. Lanes: Entry points, Trust boundaries, Access controls, Sinks, Security config. One red (High) tile in <b>Gateway, catalog, and orders services → Sinks</b>, with orange Medium tiles beside it.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/35-as-map.jpg"><figcaption>Attack surface map for mmani-demo-prs.</figcaption></figure>
+</div>
+<div class="dss">
+  <div class="head"><span class="step">STEP 21</span><span class="tag f1">F1</span> Open the red tile: it is the same injection</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Click the red tile in the Sinks lane. The panel opens on <b>Issue details</b>.</div>
+    <div class="say"><span class="lbl">Say</span>"Clicking the map lands on the same finding the PR review flagged: SQL injection in findDiscountCode, reachable from outside, at the line we started with."</div>
+    <div><span class="lbl">See</span>Panel title <code>findDiscountCode · Sinks</code>. Injection · High · Open · <code>services/orders/src/discounts.ts:20</code> · CWE-89 · Reachability External · Exploitability Moderate.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/36-as-f1-tile.jpg" style="max-height:6.4in"><figcaption>The High sink tile opens F1.</figcaption></figure>
+</div>
+<div class="dss">
+  <div class="head"><span class="step">STEP 22</span><span class="tag f1">F1</span> Data flow: what feeds the sink and what it feeds</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Switch the panel to <b>Data flow</b>. Read the left column, then the right.</div>
+    <div class="say"><span class="lbl">Say</span>"This is the neighborhood of the vulnerable call. On the left: the orders entry point, the trust boundary that accepts gateway headers, and the owner check. On the right: the sinks it feeds, including applyDiscountCode, which writes the discount. The owner check doesn't protect the query, because the query runs on the raw code."</div>
+    <div><span class="lbl">See</span>Centre: <i>Discount lookup inserts the submitted code into SQL</i> (<code>findDiscountCode</code>, line 20). Left: <code>createOrdersApp</code> entry point and trust boundary, <code>getOwnedOrder</code> access control. Right: <code>customerId</code>, <code>skusInCategory</code>, <code>applyDiscountCode</code>.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/37-as-dataflow.jpg" style="max-height:5.0in"><figcaption>Data flow around the F1 sink.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 23</span><span class="tag f1">F1</span> Reachability from the public route to the sink</div>
   <div class="cols">
     <div><span class="lbl">Do</span>Select the High injection finding. Scroll to <b>Reachability</b>.</div>
     <div class="say"><span class="lbl">Say</span>"It traces the attack path: the public discount route on the gateway, the orders handler, the interpolated lookup, and where the attacker-selected discount gets written."</div>
@@ -333,11 +361,42 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <figure class="shot"><img src="shots-jpg/29-deepscan-f1.jpg" style="max-height:6.4in"><figcaption>F1 in Deep Scan: CWE, reachability, and evidence path.</figcaption></figure>
 </div>
 
-<h3 class="pb">Stage 6 · QA user journeys: same tests, two branches</h3>
+<h3 class="pb">Stage 6 · Application Security: Fix with AI</h3>
+<p class="small">Clicking <b>Fix</b> on a finding starts a Coding Agent task. The task starts from the default branch (<code>main</code>), which already holds the corrected code, so on its first pass it reports “already addressed” and changes nothing. Before the demo, run the task once and redirect it to <code>agent/discount-codes</code> with the follow-up in Step 25. During the demo, open that existing task instead of starting a new one. Never click <b>Create PR</b> or <b>Commit and push</b>.</p>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 24</span><span class="tag f1">F1</span> Fix starts a Coding Agent task from the finding</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>In the finding panel, click <b>Fix</b>. A Coding Agent task opens. Show the prompt it wrote: it treats the scanner finding as untrusted evidence to verify, not as instructions. In the demo, open the existing <a href="https://app.coderabbit.ai/code/tasks/6265b19c-1bba-49ef-ac60-f4f66a4dd2a2">task 6265b19c</a>.</div>
+    <div class="say"><span class="lbl">Say</span>"One click turns the finding into a scoped task. The agent is told to check that the issue still exists, ground the fix in this repository, make the smallest complete change, and run the tests."</div>
+    <div><span class="lbl">See</span>Task <i>Fix injection in services/orders/src/discounts.ts</i>. The prompt opens with <i>Verify before editing</i> and embeds the finding as <code>untrusted_scanner_finding</code> (scan <code>2b10cbc0</code>, revision <code>e7a13a2</code>).</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/38-fix-task.jpg" style="max-height:6.2in"><figcaption>The Fix task and its prompt.</figcaption></figure>
+</div>
+<div class="dss">
+  <div class="head"><span class="step">STEP 25</span><span class="tag f1">F1</span> Pointed at the agent branch, it fixes and tests</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Scroll to the setup follow-up: <i>“The scan ran on branch agent/discount-codes (revision e7a13a2), not main. Check out agent/discount-codes, confirm the injection in findDiscountCode at services/orders/src/discounts.ts:20 and the interpolated discount UPDATE, and apply the smallest fix there with bound parameters. Add a regression test and run npm run check.”</i></div>
+    <div class="say"><span class="lbl">Say</span>"It reproduced the injection with a regression test, fixed both interpolated statements, and reran the suite. It also says plainly what it did not fix: the negative totals and the non-atomic redemption, which are F2. The scope stays narrow."</div>
+    <div><span class="lbl">See</span>“Fixed both SQL statements on <code>agent/discount-codes</code> with bound parameters. The new regression reproduced the injection before the fix and passes afterward.” <code>npm run check</code> passed all 18 tests. Ignore the 87-file card: it compares against <code>main</code>.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/39-fix-result.jpg" style="max-height:6.2in"><figcaption>The agent's result on the agent branch.</figcaption></figure>
+</div>
+<div class="dss">
+  <div class="head"><span class="step">STEP 26</span><span class="tag f1">F1</span> Review the patch: two bound parameters and a test</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Scroll to the diff the agent posted (<code>git diff e7a13a2 -- services/orders</code>). Point at the two removed and added pairs, then the test name. Leave the task unmerged.</div>
+    <div class="say"><span class="lbl">Say</span>"Here's the patch, small enough to review in thirty seconds. The lookup binds the code, the discount update binds the amount and the order ID, and there's a regression test named for the attack. It still goes through the same PR review as any other change. For the demo we stop here."</div>
+    <div><span class="lbl">See</span><code>upper('${code.trim()}')</code> → <code>upper(?)</code> with <code>.get(code.trim())</code>; the interpolated <code>db.exec(`UPDATE orders …`)</code> → <code>db.prepare("… = discount_cents + ? WHERE id = ?").run(amountCents, order.id)</code>. Test: <i>SQL syntax in a code cannot apply a different promotion</i>. Typecheck passed; 18 passed, 0 failed.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/40-fix-diff.jpg" style="max-height:6.2in"><figcaption>The fix as a diff against the agent branch.</figcaption></figure>
+</div>
+
+<h3 class="pb">Stage 7 · QA user journeys: same tests, two branches</h3>
 <p class="small">The QA Agent mapped nine critical user journeys from the repository's source and saved them as a reusable library under Testing → Test suites → <code>mmani-demo-prs</code>. The same library runs against any branch.</p>
 
 <div class="dss">
-  <div class="head"><span class="step">STEP 21</span>Map the journey library with an agent</div>
+  <div class="head"><span class="step">STEP 27</span>Map the journey library with an agent</div>
   <div class="cols">
     <div><span class="lbl">Do</span>Open Testing → Test suites → <code>mmani-demo-prs</code> → User journeys. For a new repo, click <b>Map with an Agent</b>, review the proposal, and reply "Apply all nine journeys."</div>
     <div class="say"><span class="lbl">Say</span>"PR testing checks one change. Journeys check the product: browsing, carts, discounts, checkout, stock, privacy, and the fulfillment handoff — written once, run on every branch."</div>
@@ -347,7 +406,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 </div>
 
 <div class="dss">
-  <div class="head"><span class="step">STEP 22</span>Baseline: all nine pass on <code>main</code></div>
+  <div class="head"><span class="step">STEP 28</span>Baseline: all nine pass on <code>main</code></div>
   <div class="cols">
     <div><span class="lbl">Do</span>Set Branch to <code>main</code>. Show the latest run.</div>
     <div class="say"><span class="lbl">Say</span>"On main — the corrected discount code — every journey passes. That is our baseline."</div>
@@ -357,7 +416,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 </div>
 
 <div class="dss">
-  <div class="head"><span class="step">STEP 23</span><span class="tag f2">F2</span> Same journeys on the agent branch: five fail</div>
+  <div class="head"><span class="step">STEP 29</span><span class="tag f2">F2</span> Same journeys on the agent branch: five fail</div>
   <div class="cols">
     <div><span class="lbl">Do</span>Set Branch to <code>agent/discount-codes</code>. Click <b>Test</b>, keep all nine journeys, and run (or show the existing run).</div>
     <div class="say"><span class="lbl">Say</span>"Nothing about the tests changed — only the branch. Five journeys now fail, and every failure is about discounts."</div>
@@ -367,7 +426,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 </div>
 
 <div class="dss">
-  <div class="head"><span class="step">STEP 24</span><span class="tag f2">F2</span> Journey evidence: negative totals and a broken handoff</div>
+  <div class="head"><span class="step">STEP 30</span><span class="tag f2">F2</span> Journey evidence: negative totals and a broken handoff</div>
   <div class="cols">
     <div><span class="lbl">Do</span>Open <i>Redeem fixed discounts within customer and campaign limits</i> → View run, and open its storefront screenshot. Then open <i>Provide a placed order to fulfillment and finance</i>.</div>
     <div class="say"><span class="lbl">Say</span>"Here is what a shopper actually sees: a $15 mug, a $20 code, and a total of minus $25. And the order the warehouse receives has a line with quantity minus one."</div>
@@ -396,6 +455,8 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <tr><td>QA Agent</td><td>Scenario 3: injected code returned 200 and applied WELCOME10</td><td>Scenario 2: subtotal 4,000 vs 6,000; mug net −2,500; consumer line quantity −1</td></tr>
   <tr><td>User journeys</td><td>—</td><td>5 of 9 journeys fail on the agent branch (all pass on main): −$25.00 storefront total; quantity −1 in the fulfillment feed</td></tr>
   <tr><td>Deep Scan</td><td>High, CWE-89, <code>discounts.ts:20</code>, reachable from the gateway route</td><td>Medium, CWE-682, <code>discounts.ts:66</code></td></tr>
+  <tr><td>Attack Surface</td><td>Red tile in services → Sinks; data flow around <code>findDiscountCode</code></td><td>Orange Medium tiles in the same lane</td></tr>
+  <tr><td>Fix with AI</td><td>Both SQL statements bound; regression test; 18 tests pass</td><td>Named as not fixed (out of scope)</td></tr>
 </table>
 
 <h3>Freshness check before every demo</h3>
@@ -406,6 +467,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <li>Locally: branch <code>agent/discount-codes</code> and base <code>demo/agent-base</code> exist.</li>
   <li>Do not push to <code>agent/discount-codes</code>; every push triggers a new review.</li>
   <li>Deep Scan: show scan <code>2b10cbc0</code> (agent branch). A scan of <code>main</code> does not contain F1.</li>
+  <li>Fix with AI: open the existing task <code>6265b19c</code>. Clicking <b>Fix</b> again starts a new task from <code>main</code> that reports “already addressed”. Do not click Create PR or Commit and push.</li>
 </ol>
 
 <h3 class="pb">Appendix A — Deep-link index</h3>
@@ -419,6 +481,8 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <tr><td>Change Stack</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview">overview</a> · <a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/layers/2">layer 2</a></td></tr>
   <tr><td>QA Agent run</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/qa-agent?qaRunId=b2070439-9e89-49bd-a484-5bcfe3dbdff6&amp;qaView=history">PR #3 QA run</a></td></tr>
   <tr><td>Deep Scan</td><td><a href="https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&amp;repo=mmani-demo-prs&amp;tab=code&amp;scanId=2b10cbc0-68c6-404b-927b-7963e1ed70ab">scan 2b10cbc0 findings</a></td></tr>
+  <tr><td>Attack Surface</td><td><a href="https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&amp;repo=mmani-demo-prs">mmani-demo-prs → Attack surface</a></td></tr>
+  <tr><td>Fix with AI task</td><td><a href="https://app.coderabbit.ai/code/tasks/6265b19c-1bba-49ef-ac60-f4f66a4dd2a2">task 6265b19c</a></td></tr>
 </table>
 
 <h3 class="pb">Appendix B — Focused PRs for single-feature demos</h3>
