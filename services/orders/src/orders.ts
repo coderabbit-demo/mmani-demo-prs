@@ -93,3 +93,24 @@ export function markPlaced(db: DatabaseSync, orderId: string): void {
     orderId,
   );
 }
+
+/**
+ * The order as shown on receipts and packing slips: the applied discount is
+ * listed as its own line so customers and the warehouse can see the promotion.
+ */
+export function withReceiptLines(order: Order): Order {
+  if (!order.discountCode || order.totals.discountCents === 0) return order;
+  return {
+    ...order,
+    lines: [
+      ...order.lines,
+      {
+        sku: `DISCOUNT-${order.discountCode}`,
+        name: `Discount (${order.discountCode})`,
+        quantity: -1,
+        unitPriceCents: order.totals.discountCents,
+        lineTotalCents: -order.totals.discountCents,
+      },
+    ],
+  };
+}
