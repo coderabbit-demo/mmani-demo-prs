@@ -71,11 +71,13 @@ test("a different code replaces the first and releases its redemption", async ()
   assert.equal(redemptions("WELCOME10"), before);
 });
 
-test("fixed codes are limited to one redemption per customer", async () => {
-  const first = await cartWith(GRACE, [["HOODIE-GRY-L", 1]]);
-  assert.equal((await applyCode(GRACE, first, "SAVE20")).status, 200);
-  const second = await cartWith(GRACE, [["HOODIE-GRY-L", 1]]);
-  assert.equal((await applyCode(GRACE, second, "SAVE20")).status, 409);
+test("a shopper can reuse a fixed code on a new cart", async () => {
+  const abandoned = await cartWith(GRACE, [["HOODIE-GRY-L", 1]]);
+  assert.equal((await applyCode(GRACE, abandoned, "SAVE20")).status, 200);
+  const next = await cartWith(GRACE, [["HOODIE-GRY-L", 1]]);
+  const { status, body } = await applyCode(GRACE, next, "SAVE20");
+  assert.equal(status, 200);
+  assert.equal(body.totals.discountCents, 2000);
 });
 
 test("max_redemptions holds when two carts race for the last redemption", async () => {
