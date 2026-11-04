@@ -1,5 +1,5 @@
 import type { Product } from "../../packages/contracts/src/catalog.ts";
-import type { Order } from "../../packages/contracts/src/orders.ts";
+import type { Order, OrderSummary } from "../../packages/contracts/src/orders.ts";
 
 export interface Shopper {
   token: string;
@@ -24,6 +24,7 @@ async function request<T>(token: string | null, path: string, init: RequestInit 
 export const api = {
   shoppers: () => request<Shopper[]>(null, "/shoppers"),
   products: (token: string) => request<Product[]>(token, "/products"),
+  orderHistory: (token: string) => request<OrderSummary[]>(token, "/orders?status=placed"),
   createOrder: (token: string) => request<Order>(token, "/orders", { method: "POST" }),
   setLine: (token: string, orderId: string, sku: string, quantity: number) =>
     request<Order>(token, `/orders/${orderId}/lines/${sku}`, {
