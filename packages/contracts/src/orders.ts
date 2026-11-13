@@ -38,6 +38,13 @@ export interface Order {
   placedAt: string | null;
 }
 
+export interface OrderSummary {
+  id: string;
+  placedAt: string | null;
+  itemCount: number;
+  netCents: number;
+}
+
 export interface ApplyDiscountRequest {
   code: string;
 }

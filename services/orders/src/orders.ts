@@ -1,6 +1,11 @@
 import { randomBytes } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import type { Order, OrderLine, OrderStatus } from "../../../packages/contracts/src/orders.ts";
+import type {
+  Order,
+  OrderLine,
+  OrderStatus,
+  OrderSummary,
+} from "../../../packages/contracts/src/orders.ts";
 import { HttpError } from "../../../packages/service-kit/src/http.ts";
 import { computeTotals, lineTotalCents } from "./pricing.ts";
 
@@ -92,4 +97,19 @@ export function markPlaced(db: DatabaseSync, orderId: string): void {
     new Date().toISOString(),
     orderId,
   );
+}
+
+export function listOrders(db: DatabaseSync, customerId: string, status: OrderStatus): OrderSummary[] {
+  const ids = db
+    .prepare("SELECT id FROM orders WHERE customer_id = ? AND status = ? ORDER BY COALESCE(placed_at, created_at) DESC")
+    .all(customerId, status) as Array<{ id: string }>;
+  return ids.map(({ id }) => {
+    const order = getOrder(db, id)!;
+    return {
+      id: order.id,
+      placedAt: order.placedAt,
+      itemCount: order.lines.reduce((sum, line) => sum + line.quantity, 0),
+      netCents: order.totals.netCents,
+    };
+  });
 }
