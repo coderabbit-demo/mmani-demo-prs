@@ -435,6 +435,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <figure class="shot"><img src="shots-jpg/32-journey-fixed-discount.jpg"><figcaption>Fixed-discount journey: four product bugs, with recording and screenshot.</figcaption></figure>
   <figure class="shot"><img src="shots-jpg/33-journey-storefront-negative.jpg" style="max-height:3.6in"><figcaption>The storefront during the journey: a −$25.00 total.</figcaption></figure>
   <figure class="shot"><img src="shots-jpg/34-journey-fulfillment.jpg"><figcaption>Fulfillment handoff journey: quantity −1 line and a double-counted net.</figcaption></figure>
+  <p class="small">To reproduce this live on the running storefront by hand instead of from the journey screenshots, see <a href="#sec-appendix-d-live-storefront-repro-f2">Appendix D</a>.</p>
 </div>
 <div class="call"><b class="t">WOW</b> One journey library, written once from the source. On main it is green; on the agent branch it reproduces F2 from the shopper's screen to the warehouse's order feed.</div>
 
@@ -550,6 +551,42 @@ git restore --staged --worktree .          # discard edits to tracked files
 git switch agent/discount-codes
 git reset --hard origin/agent/discount-codes</pre>
 <p class="small">Do not push from this checkout. Any push to <code>agent/discount-codes</code> triggers a new PR review on PR #3.</p>
+
+<h3 class="pb">Appendix D — Live storefront repro (F2)</h3>
+<p>Exact steps to reproduce F2 by hand in the running app, if you want to show the defect live instead of (or alongside) the QA journey screenshots in Stage 7. The storefront must run the <code>agent/discount-codes</code> code — the same branch the CLI/VS Code review uses — so the bug is present. Data is synthetic and resets on every restart.</p>
+
+<h4>1. Start the app</h4>
+<pre>cd ~/projects/mmani-demo-prs
+git switch agent/discount-codes      # the buggy branch (see Appendix C)
+npm run dev                          # catalog :4001, orders :4002, gateway :8080, storefront :5173</pre>
+<p class="small">Open <a href="http://localhost:5173/">http://localhost:5173/</a>. The <code>/demo-ready</code> skill starts this for you.</p>
+
+<h4>2. The negative-total repro (the headline)</h4>
+<ol>
+  <li>Add the <b>Ceramic carrot mug</b> ($15.00) to the cart — quantity 1.</li>
+  <li>Open the cart and apply discount code <code>SAVE20</code> (a $20.00 fixed code).</li>
+  <li>Observe: <b>Subtotal −$5.00</b>, <b>Discount −$20.00</b>, <b>Total −$25.00</b>.</li>
+</ol>
+<p class="small">Why −$25.00: the $20 discount is subtracted <i>twice</i> — once as a quantity −1 adjustment line ($15 − $20 = −$5 subtotal), then again via <code>discount_cents</code> (another −$20) — and the fixed amount is never capped to the subtotal. Code: <code>discounts.ts:67-73</code> (the two deductions) and <code>:29-30</code> (no cap).</p>
+
+<h4>3. The double-count variant (positive but wrong)</h4>
+<ol>
+  <li>Build a cart totalling <b>$65.00</b>.</li>
+  <li>Apply <code>WELCOME10</code> (10%).</li>
+  <li>Observe the net comes to <b>$52.00</b> instead of the correct <b>$58.50</b> — the 10% ($6.50) is deducted twice.</li>
+</ol>
+
+<h4>Seeded discount codes</h4>
+<ul>
+  <li><code>SAVE20</code> — $20.00 fixed (use for the −$25.00 repro).</li>
+  <li><code>WELCOME10</code> — 10% off (use for the $65 → $52 double-count).</li>
+  <li><code>APPAREL15</code> — 15% off apparel only.</li>
+  <li><code>VIP50</code> — $50.00 fixed, single use.</li>
+  <li><code>SUMMER25</code> — 25% off, <b>expired</b> (shows the 422 "not active" path).</li>
+</ul>
+
+<h4>Reset</h4>
+<p class="small">Restart <code>npm run dev</code> to clear the cart and re-seed. Stop the server with <code>pkill -f scripts/dev.ts</code> after the demo.</p>
 
 </body>
 </html>
