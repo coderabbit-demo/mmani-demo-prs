@@ -15,6 +15,7 @@ export type OrderStatus = "cart" | "placed" | "cancelled";
 export interface OrderLine {
   sku: string;
   name: string;
+  /** Units ordered. The receipt line for an applied discount (`DISCOUNT-<code>`) uses -1. */
   quantity: number;
   unitPriceCents: number;
   lineTotalCents: number;

@@ -26,7 +26,7 @@ export function Cart({ order, busy, onQuantity, onRemove, onCheckout, onApplyCod
     <aside className="cart" aria-label="Cart">
       <h2>{editable ? "Cart" : "Order placed"}</h2>
       <ul className="lines">
-        {order.lines.map((line) => (
+        {order.lines.filter((line) => line.quantity > 0).map((line) => (
           <li key={line.sku}>
             <span className="line-name">{line.name}</span>
             {editable ? (
