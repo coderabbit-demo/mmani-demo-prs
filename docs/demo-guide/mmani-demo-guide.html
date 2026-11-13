@@ -234,7 +234,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 <div class="dss">
   <div class="head"><span class="step">STEP 12</span>Change Stack overview and layers</div>
   <div class="cols">
-    <div><span class="lbl">Do</span>Open <a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview">Change Stack for PR #3</a>. Read the cards, then the layer rail.</div>
+    <div><span class="lbl">Do</span>Open <a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&amp;reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365">Change Stack for PR #3</a> (pinned to the <code>f8c4f9b</code> review run; the latest run on the merge head was review-skipped and is empty). Read the cards, then the layer rail.</div>
     <div class="say"><span class="lbl">Say</span>"Seven functional layers instead of thirteen files. Six of them carry findings, and the overview tells me what blocks the merge."</div>
     <div><span class="lbl">See</span>7 layers, 13 files, 16 findings (2 Critical, 13 Major); merge blockers; the layer rail with per-layer finding counts.</div>
   </div>
@@ -393,12 +393,12 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 </div>
 
 <h3 class="pb">Stage 7 · QA user journeys: same tests, two branches</h3>
-<p class="small">The QA Agent mapped nine critical user journeys from the repository's source and saved them as a reusable library under Testing → Test suites → <code>mmani-demo-prs</code>. The same library runs against any branch.</p>
+<p class="small">The QA Agent mapped nine critical user journeys from the repository's source and saved them as a reusable library under Verification → Test suites → <code>mmani-demo-prs</code>. The same library runs against any branch.</p>
 
 <div class="dss">
   <div class="head"><span class="step">STEP 27</span>Map the journey library with an agent</div>
   <div class="cols">
-    <div><span class="lbl">Do</span>Open Testing → Test suites → <code>mmani-demo-prs</code> → User journeys. For a new repo, click <b>Map with an Agent</b>, review the proposal, and reply "Apply all nine journeys."</div>
+    <div><span class="lbl">Do</span>Open <a href="https://app.coderabbit.ai/verify/repositories">Verification → Test suites</a> → <code>mmani-demo-prs</code> → User journeys. For a new repo, click <b>Map with an Agent</b>, review the proposal, and reply "Apply all nine journeys."</div>
     <div class="say"><span class="lbl">Say</span>"PR testing checks one change. Journeys check the product: browsing, carts, discounts, checkout, stock, privacy, and the fulfillment handoff — written once, run on every branch."</div>
     <div><span class="lbl">See</span>Nine journeys, each with a user, a goal, test steps, and assertions grounded in the source.</div>
   </div>
@@ -478,11 +478,13 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <tr><td>F1 on the PR</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733137">discussion_r4407733137</a></td></tr>
   <tr><td>F2 on the PR</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733154">discussion_r4407733154</a>, <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733140">…140</a>, <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3#discussion_r4407733132">…132</a></td></tr>
   <tr><td>Triage</td><td><a href="https://app.coderabbit.ai/triage?repo=mmani-demo-prs">app.coderabbit.ai/triage?repo=mmani-demo-prs</a></td></tr>
-  <tr><td>Change Stack</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview">overview</a> · <a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/layers/2">layer 2</a></td></tr>
+  <tr><td>Change Stack</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&amp;reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365">overview (f8c4f9b)</a> · <a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/layers/2?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&amp;reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365">layer 2</a></td></tr>
+  <tr><td>Security Blast radius</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/blast-radius?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&amp;reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365">blast radius (f8c4f9b)</a></td></tr>
   <tr><td>QA Agent run</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/qa-agent?qaRunId=b2070439-9e89-49bd-a484-5bcfe3dbdff6&amp;qaView=history">PR #3 QA run</a></td></tr>
   <tr><td>Deep Scan</td><td><a href="https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&amp;repo=mmani-demo-prs&amp;tab=code&amp;scanId=2b10cbc0-68c6-404b-927b-7963e1ed70ab">scan 2b10cbc0 findings</a></td></tr>
   <tr><td>Attack Surface</td><td><a href="https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&amp;repo=mmani-demo-prs">mmani-demo-prs → Attack surface</a></td></tr>
   <tr><td>Fix with AI task</td><td><a href="https://app.coderabbit.ai/code/tasks/6265b19c-1bba-49ef-ac60-f4f66a4dd2a2">task 6265b19c</a></td></tr>
+  <tr><td>Verification / Testing</td><td><a href="https://app.coderabbit.ai/verify/repositories">app.coderabbit.ai/verify/repositories</a> → Test suites → mmani-demo-prs</td></tr>
 </table>
 
 <h3 class="pb">Appendix B — Focused PRs for single-feature demos</h3>
