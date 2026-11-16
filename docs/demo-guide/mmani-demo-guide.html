@@ -59,7 +59,7 @@
 
 <div class="kicker">Internal · Do / Say / See runbook · CodeRabbit Field Engineering Enablement</div>
 <h1>Follow one finding: from Jira ticket to Deep Scan</h1>
-<p class="lede">A single feature, written by a coding agent, followed end to end: local review in the CLI and VS Code, the pull request review, Triage, Change Stack, QA Agent, the Security Deep Scan and Attack Surface, Fix with AI, and QA user journeys. The same two findings appear at every stop. Demo repository <code>coderabbit-demo/mmani-demo-prs</code>, PR #3, Jira story SC-10. Captured October 28, 2026, in light mode. Allow about 30 minutes plus questions.</p>
+<p class="lede">A single feature, written by a coding agent, followed end to end: local review in the CLI and VS Code, the pull request review, Triage, Change Stack, QA Agent, the Security Deep Scan and Attack Surface, Fix with AI, and QA user journeys, then the approval policy that gives low-risk PRs a faster path to merge. The same two findings appear at every stop. Demo repository <code>coderabbit-demo/mmani-demo-prs</code>, PR #3, Jira story SC-10. Captured October 28, 2026, in light mode. Allow about 35 minutes plus questions.</p>
 
 <div class="call"><b class="t">Open with this</b> "One Jira ticket, one coding agent, one branch. Let's follow two things the agent got wrong — a security hole and a money bug — from the developer's laptop all the way to the security team's scan. Same findings, every stop."</div>
 
@@ -78,7 +78,7 @@
   <div class="stat"><div class="n">1</div><div class="d">Jira story · SC-10</div></div>
   <div class="stat"><div class="n">1</div><div class="d">Coding-agent PR · #3</div></div>
   <div class="stat"><div class="n">2</div><div class="d">Tracked findings · F1 + F2</div></div>
-  <div class="stat"><div class="n">10</div><div class="d">Stops on the trail</div></div>
+  <div class="stat"><div class="n">11</div><div class="d">Stops on the trail</div></div>
 </div>
 
 <!--INDEX-->
@@ -96,6 +96,7 @@
   <tr><td>Jira story</td><td><a href="https://coderabbit-demo.atlassian.net/browse/SC-10">SC-10 Discount codes at checkout</a></td><td>The task, with success criteria S1–S10</td></tr>
   <tr><td>Pull request</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3">mmani-demo-prs #3</a></td><td>Coding-agent delivery, branch <code>agent/discount-codes</code></td></tr>
   <tr><td>Consumer repo</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs-consumer">mmani-demo-prs-consumer</a></td><td>Fulfillment and finance service broken by F2</td></tr>
+  <tr><td>Approvals repo</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals">mmani-demo-prs-approvals</a></td><td>Copy with automatic approval on; PRs #1–#3 for Stage 8</td></tr>
   <tr><td>Standards</td><td><a href="https://github.com/coderabbit-demo/coderabbit-standards/tree/main/commerce">coderabbit-standards/commerce</a></td><td>Order, discount, and data-access rules cited as Coding guidelines</td></tr>
 </table>
 <p>PR #3 is open, unmerged, and labeled <code>Demo - Do not merge</code>, <code>coding-agent</code>, and <code>showcase: all-in-one</code>. The defects are intentional. The application is a demo storefront with synthetic data; never deploy it publicly.</p>
@@ -439,8 +440,83 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 </div>
 <div class="call"><b class="t">WOW</b> One journey library, written once from the source. On main it is green; on the agent branch it reproduces F2 from the shopper's screen to the warehouse's order feed.</div>
 
+<h3 class="pb">Stage 8 · Approval policy: a faster path to merge for low-risk PRs</h3>
+<p class="small">This stage uses a separate repository, <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals"><code>mmani-demo-prs-approvals</code></a>: a copy of <code>mmani-demo-prs</code> with automatic approval turned on, so nothing in the main demo repo changes. <code>main</code> requires two approvals and four status checks. CodeRabbit supplies one approval only when Merge Risk is low or minimal, there are no blocking findings, and every pre-merge check passes. A person supplies the other. Three open PRs show the three outcomes.</p>
 
-<div class="call"><b class="t">The line that lands</b> "One ticket, one agent, two mistakes — and every stop saw them: my laptop, the PR, the reviewer's queue, the architecture view, the test run, and the security scan. Nothing reached main."</div>
+<div class="dss">
+  <div class="head"><span class="step">STEP 31</span>The approval policy lives in the repository</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/blob/main/.coderabbit.yaml"><code>.coderabbit.yaml</code></a>. Point at <code>auto_approvals</code> and <code>merge_risk_instructions</code>. Then open <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/tree/main/.coderabbit/pre-merge-checks"><code>.coderabbit/pre-merge-checks/</code></a> and one check file.</div>
+    <div class="say"><span class="lbl">Say</span>"The policy is code, reviewed like code. CodeRabbit may approve only when merge risk is low. We describe what risk means for this codebase in plain English. The custom checks are Markdown files, and each one reports as its own GitHub check."</div>
+    <div><span class="lbl">See</span><code>max_merge_risk: low</code>, <code>allow_author_approval: false</code>, and the risk instructions (removing a transaction or lock is high; a narrow filter or validation change with a test is low). Four check files: Security Gate, Jira Work Item, Success Criteria, Order Invariants.</div>
+  </div>
+<pre>reviews:
+  auto_approvals:
+    enabled: true
+    max_merge_risk: low          # moderate or higher → two people approve
+    allow_author_approval: false
+  merge_risk_instructions: >-
+    High risk: removing or weakening a transaction, row lock, or CHECK constraint; ...
+    Low risk: a narrow change to one query's filter or one validation rule in a
+    single service, with no schema or contract change and a test ...
+
+# .coderabbit/pre-merge-checks/security-gate.md
+---
+id: security-gate
+name: Security Gate
+mode: error
+report: platform              # a GitHub Check Run
+---
+Fail only when CodeRabbit's review findings on this PR include an unresolved
+major or critical SECURITY issue ...</pre>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 32</span>Branch rules still apply: two approvals and required checks</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/settings/branches">Settings → Branches</a> → <code>main</code> (admins only; otherwise show the screenshot).</div>
+    <div class="say"><span class="lbl">Say</span>"Nothing about GitHub's rules changes. Main still needs two approvals and green checks. CodeRabbit can be one of the two approvers, never both, and its own checks are required like CI."</div>
+    <div><span class="lbl">See</span>Required approvals: 2; dismiss stale approvals on new commits. Required checks: <code>check</code> (GitHub Actions) and three <code>CodeRabbit / …</code> checks, each pinned to its app.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/41-approvals-branch-protection.jpg" style="max-height:6in"><figcaption>Branch protection on main: two approvals plus four required checks.</figcaption></figure>
+  <p class="small">Check Runs are named <code>CodeRabbit / &lt;id&gt;</code>; the check name appears after the dash on the PR. Order Invariants is deliberately not required, because it runs only when <code>services/**</code> or <code>packages/contracts/**</code> change; when it fails, CodeRabbit still withholds approval.</p>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 33</span>Low risk, clean review: CodeRabbit supplies one approval</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/3">PR #3</a> (SC-45, expired-code message). Expand <b>Merge Risk</b>, then scroll to the merge box.</div>
+    <div class="say"><span class="lbl">Say</span>"A two-file change with a test. Merge risk is minimal, the four checks pass, and there are no findings, so CodeRabbit approved. It is one of two. A person still has to approve before this can merge."</div>
+    <div><span class="lbl">See</span>Merge Risk Minimal, tied to the reviewed commit. Pre-merge checks: 4 passed. <i>coderabbitai approved these changes</i>. Merge box: 1 approval, all checks passed, "At least 2 approving reviews are required".</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/42-approvals-pr3-approved.jpg" style="max-height:6in"><figcaption>PR #3: CodeRabbit's approval counts as one of the two required.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 34</span>Low risk is not enough: an open Major finding withholds approval</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/1">PR #1</a> (SC-18, reuse a fixed code). Expand <b>Merge Risk</b>, then open the Major finding at <code>discounts.ts:125</code>.</div>
+    <div class="say"><span class="lbl">Say</span>"Same low risk, all checks green, but the review found a real gap: an abandoned cart keeps a capped code's redemption reserved. Approval waits for the finding to be fixed or resolved by a person. CodeRabbit requested changes instead."</div>
+    <div><span class="lbl">See</span>Merge Risk Low, with its reason. <i>coderabbitai requested changes</i>. The finding opens with "Observation:" and names the line and the invariant, per the tone instructions.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/43-approvals-pr1-finding.jpg" style="max-height:6.2in"><figcaption>PR #1: Low merge risk, but a Major finding blocks approval.</figcaption></figure>
+</div>
+
+<div class="dss">
+  <div class="head"><span class="step">STEP 35</span>High risk: two people approve, and the checks block the merge</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/2">PR #2</a> (SC-14, drop the write lock). Expand <b>Merge Risk</b>, then expand the checks in the merge box.</div>
+    <div class="say"><span class="lbl">Say</span>"Removing a transaction is high risk under our own rules, and the explanation says why: a failed swap can lose a redemption record. No automatic approval. Two Markdown checks failed, and Success Criteria is required, so GitHub blocks the merge too."</div>
+    <div><span class="lbl">See</span>Merge Risk High and Security architecture risk High. Failing: Order Invariants and Success Criteria (Required). Passing: CI, Security Gate, Jira Work Item.</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/44-approvals-pr2-merge-risk.jpg"><figcaption>PR #2: High merge risk, with the reason and the fix.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/45-approvals-pr2-checks.jpg" style="max-height:5in"><figcaption>PR #2: Markdown checks report as GitHub Check Runs; required ones block the merge.</figcaption></figure>
+</div>
+<div class="call"><b class="t">WOW</b> One policy, three outcomes. Minimal risk and a clean review: CodeRabbit is the second reviewer. Low risk with an open Major finding: changes requested. High risk: two people approve. GitHub's branch rules decide the merge in every case.</div>
+<div class="call dont"><b class="t">Don't do this</b> Do not approve or merge the three PRs; a second approval on PR #3 makes it mergeable. Do not resolve the PR #1 thread or push to any of the three branches: each push triggers a new review and dismisses the approval. Do not claim a Verify pass sets the approval. Merge Risk, findings, and pre-merge checks do. Triage Risk is a separate score.</div>
+
+
+<div class="call"><b class="t">The line that lands</b> "One ticket, one agent, two mistakes — and every stop saw them: my laptop, the PR, the reviewer's queue, the architecture view, the test run, and the security scan. Nothing reached main. And when a change is small and clean, CodeRabbit can be the second reviewer, so your people spend their review time on the risky ones."</div>
 
 <h2 class="pb">Part III — Reference</h2>
 
@@ -468,6 +544,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <li>Locally: branch <code>agent/discount-codes</code> and base <code>demo/agent-base</code> exist.</li>
   <li>Do not push to <code>agent/discount-codes</code>; every push triggers a new review.</li>
   <li>Deep Scan: show scan <code>2b10cbc0</code> (agent branch). A scan of <code>main</code> does not contain F1.</li>
+  <li>Approvals repo: PR #3 shows <i>coderabbitai approved</i> and 1 of 2 approvals; PR #1 and PR #2 show <i>requested changes</i>. All three are open, unmerged, and labeled <code>Demo - Do not merge</code>. If PR #3 lost its approval (a push dismisses it), wait for the new review before the demo.</li>
   <li>Fix with AI: open the existing task <code>6265b19c</code>. Clicking <b>Fix</b> again starts a new task from <code>main</code> that reports “already addressed”. Do not click Create PR or Commit and push.</li>
 </ol>
 
@@ -485,6 +562,8 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <tr><td>Deep Scan</td><td><a href="https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&amp;repo=mmani-demo-prs&amp;tab=code&amp;scanId=2b10cbc0-68c6-404b-927b-7963e1ed70ab">scan 2b10cbc0 findings</a></td></tr>
   <tr><td>Attack Surface</td><td><a href="https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&amp;repo=mmani-demo-prs">mmani-demo-prs → Attack surface</a></td></tr>
   <tr><td>Fix with AI task</td><td><a href="https://app.coderabbit.ai/code/tasks/6265b19c-1bba-49ef-ac60-f4f66a4dd2a2">task 6265b19c</a></td></tr>
+  <tr><td>Approvals repo</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/blob/main/.coderabbit.yaml">.coderabbit.yaml</a> · <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/tree/main/.coderabbit/pre-merge-checks">pre-merge-checks/</a> · <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/settings/branches">branch rules</a></td></tr>
+  <tr><td>Approval outcomes</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/3">PR #3 approved</a> · <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/1">PR #1 finding</a> · <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/2">PR #2 high risk</a> · Jira <a href="https://coderabbit-demo.atlassian.net/browse/SC-45">SC-45</a></td></tr>
   <tr><td>Verification / Testing</td><td><a href="https://app.coderabbit.ai/verify/repositories">app.coderabbit.ai/verify/repositories</a> → Test suites → mmani-demo-prs</td></tr>
 </table>
 
