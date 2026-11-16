@@ -292,22 +292,22 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 <div class="dss">
   <div class="head"><span class="step">STEP 17</span><span class="tag f2">F2</span> The money bug, proven in the running app</div>
   <div class="cols">
-    <div><span class="lbl">Do</span>Open scenario 2, <i>It preserves physical order lines and totals through discounted checkout</i>. Show <b>Evidence</b>, then <b>Checks</b> → Failed.</div>
+    <div><span class="lbl">Do</span>Open scenario 2, <i>It preserves physical order lines and totals through discounted checkout</i>. On <b>Evidence</b>, expand <b>Failed</b> to show expected versus observed, then collapse it to show the execution result.</div>
     <div class="say"><span class="lbl">Say</span>"Checkout worked — and that is the problem. The hoodie cart reports a 4,000-cent subtotal instead of 6,000, the fulfillment consumer receives a quantity of minus one, and the mug cart nets minus $25."</div>
     <div><span class="lbl">See</span>Observed: "Discounted cart reported subtotal 4000 rather than 6000." "The mug cart net was -2500, below zero." Execution log linked to each check.</div>
   </div>
+  <figure class="shot"><img src="shots-jpg/23-qa-f2-checks.jpg" style="max-height:5.4in"><figcaption>Scenario 2 failed assertions: expected versus observed, with an execution log for each.</figcaption></figure>
   <figure class="shot"><img src="shots-jpg/22-qa-f2-evidence.jpg" style="max-height:5.4in"><figcaption>Scenario 2 evidence: execution result.</figcaption></figure>
-  <figure class="shot"><img src="shots-jpg/23-qa-f2-checks.jpg" style="max-height:5.4in"><figcaption>Scenario 2 failed checks: double-counted subtotal and negative net.</figcaption></figure>
 </div>
 
 <div class="dss">
   <div class="head"><span class="step">STEP 18</span><span class="tag f1">F1</span> The injection, exploited in the running app</div>
   <div class="cols">
-    <div><span class="lbl">Do</span>Open scenario 3, <i>It rejects unauthorized discount and unsafe sorting requests</i>. Show <b>Checks</b> → Failed.</div>
+    <div><span class="lbl">Do</span>Open scenario 3, <i>It rejects unauthorized discount and unsafe sorting requests</i> (or click <b>Next</b>). On <b>Evidence</b>, expand <b>Failed</b>.</div>
     <div class="say"><span class="lbl">Say</span>"This is F1 with proof. An injected code was accepted and applied someone else's discount. Same scenario: the SQL sort expression was accepted and a placed order was changed."</div>
     <div><span class="lbl">See</span>Observed: "Injected code returned 200 and applied WELCOME10 for 600 cents." 7 failed assertions, each with an execution log.</div>
   </div>
-  <figure class="shot"><img src="shots-jpg/24-qa-f1-checks.jpg" style="max-height:5.4in"><figcaption>Scenario 3 failed checks: the injected code was accepted.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/24-qa-f1-checks.jpg" style="max-height:5.4in"><figcaption>Scenario 3 failed assertions: the injected code was accepted.</figcaption></figure>
 </div>
 <div class="call"><b class="t">WOW</b> The same two findings from the CLI are now reproduced against the running application, with expected versus observed values and execution logs.</div>
 
@@ -403,7 +403,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
     <div class="say"><span class="lbl">Say</span>"PR testing checks one change. Journeys check the product: browsing, carts, discounts, checkout, stock, privacy, and the fulfillment handoff — written once, run on every branch."</div>
     <div><span class="lbl">See</span>Nine journeys, each with a user, a goal, test steps, and assertions grounded in the source.</div>
   </div>
-  <figure class="shot"><img src="shots-jpg/26-journeys-library.jpg" style="max-height:6in"><figcaption>The journey library for mmani-demo-prs.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/26-journeys-library.jpg" style="max-height:6in"><figcaption>Verify → mmani-demo-prs → Journey Testing: the journey library.</figcaption></figure>
 </div>
 
 <div class="dss">
@@ -419,7 +419,7 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 <div class="dss">
   <div class="head"><span class="step">STEP 29</span><span class="tag f2">F2</span> Same journeys on the agent branch: five fail</div>
   <div class="cols">
-    <div><span class="lbl">Do</span>Set Branch to <code>agent/discount-codes</code>. Click <b>Test</b>, keep all nine journeys, and run (or show the existing run).</div>
+    <div><span class="lbl">Do</span>Set Branch to <code>agent/discount-codes</code>. Show the latest run. To rerun, select all nine journeys and click <b>Run tests</b>.</div>
     <div class="say"><span class="lbl">Say</span>"Nothing about the tests changed — only the branch. Five journeys now fail, and every failure is about discounts."</div>
     <div><span class="lbl">See</span>Bugs on: apply and replace discounts; recover from an invalid or expired discount; redeem fixed discounts; place an order; fulfillment and finance handoff. Browsing, cart editing, stock recovery, and privacy still pass.</div>
   </div>
