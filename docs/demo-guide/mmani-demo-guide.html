@@ -59,7 +59,7 @@
 
 <div class="kicker">Internal · Do / Say / See runbook · CodeRabbit Field Engineering Enablement</div>
 <h1>Follow one finding: from Jira ticket to Deep Scan</h1>
-<p class="lede">A single feature, written by a coding agent, followed end to end: local review in the CLI and VS Code, the pull request review, Triage, Change Stack, QA Agent, the Security Deep Scan and Attack Surface, Fix with AI, and QA user journeys, then the approval policy that gives low-risk PRs a faster path to merge. The same two findings appear at every stop. Demo repository <code>coderabbit-demo/mmani-demo-prs</code>, PR #3, Jira story SC-10. Captured October 28, 2026, in light mode. Allow about 35 minutes plus questions.</p>
+<p class="lede">A single feature, written by a coding agent, followed end to end: local review in the CLI and VS Code, the pull request review, Triage, Change Stack, CodeRabbit Verify PR testing, the Security Deep Scan and Attack Surface, Fix with AI, and Verify user journeys, then the approval policy that gives low-risk PRs a faster path to merge. The same two findings appear at every stop. Demo repository <code>coderabbit-demo/mmani-demo-prs</code>, PR #3, Jira story SC-10. Captured October 28, 2026, in light mode. Allow about 35 minutes plus questions.</p>
 
 <div class="call"><b class="t">Open with this</b> "One Jira ticket, one coding agent, one branch. Let's follow two things the agent got wrong — a security hole and a money bug — from the developer's laptop all the way to the security team's scan. Same findings, every stop."</div>
 
@@ -275,17 +275,17 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <figure class="shot"><img src="shots-jpg/09-pr-security-architecture.jpg"><figcaption>Security architecture risk in the PR summary.</figcaption></figure>
 </div>
 
-<h3 class="pb">Stage 4 · QA Agent</h3>
-<p class="small">The QA Agent ran against the deployed demo environment on commit <code>e7a13a2</code>: 5 scenarios, 11 bugs, 16 m 56 s. All five scenarios failed. The two below carry F1 and F2.</p>
+<h3 class="pb">Stage 4 · CodeRabbit Verify: PR testing</h3>
+<p class="small">CodeRabbit Verify ran against the prepared demo environment on commit <code>e7a13a2</code>: 5 scenarios, 11 bugs, 16 m 56 s. All five scenarios failed. The two below carry F1 and F2.</p>
 
 <div class="dss">
-  <div class="head"><span class="step">STEP 16</span>Run the QA Agent on PR #3</div>
+  <div class="head"><span class="step">STEP 16</span>Run CodeRabbit Verify on PR #3</div>
   <div class="cols">
-    <div><span class="lbl">Do</span>On PR #3, comment <code>@coderabbitai test</code> (or open <b>QA Agent</b> in Change Stack and click <b>Run current plan</b>). For the prepared demo, open the existing run from the PR comment's <b>Review Evidence</b> button.</div>
-    <div class="say"><span class="lbl">Say</span>"Findings are claims. The QA Agent turns them into tests, runs them against the running app, and keeps the evidence."</div>
+    <div><span class="lbl">Do</span>On PR #3, comment <code>@coderabbitai test</code> (or open <b>Verify</b> in Change Stack and click <b>Run scenarios</b>). For the prepared demo, open the existing run from the PR comment's <b>Review Evidence</b> button.</div>
+    <div class="say"><span class="lbl">Say</span>"Findings are claims. CodeRabbit Verify turns them into tests, runs them against the running app, and keeps the evidence."</div>
     <div><span class="lbl">See</span>"At least one QA scenario demonstrated a regression." Run failed · 5 of 5 scenarios · 11 bugs, with testing limits stated plainly.</div>
   </div>
-  <figure class="shot"><img src="shots-jpg/21-qa-pr-summary.jpg" style="max-height:5in"><figcaption>QA Agent result on the PR.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/21-qa-pr-summary.jpg" style="max-height:5in"><figcaption>CodeRabbit Verify result on the PR.</figcaption></figure>
   <figure class="shot"><img src="shots-jpg/25-qa-run.jpg"><figcaption>The run in Change Stack: five scenarios, each with evidence.</figcaption></figure>
 </div>
 
@@ -393,13 +393,13 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <figure class="shot"><img src="shots-jpg/40-fix-diff.jpg" style="max-height:6.2in"><figcaption>The fix as a diff against the agent branch.</figcaption></figure>
 </div>
 
-<h3 class="pb">Stage 7 · QA user journeys: same tests, two branches</h3>
-<p class="small">The QA Agent mapped nine critical user journeys from the repository's source and saved them as a reusable library under Verification → Test suites → <code>mmani-demo-prs</code>. The same library runs against any branch.</p>
+<h3 class="pb">Stage 7 · Verify user journeys: same tests, two branches</h3>
+<p class="small">CodeRabbit Verify mapped nine critical user journeys from the repository's source and saved them as a reusable library under Verify → <code>mmani-demo-prs</code> → Journey Testing. The same library runs against any branch.</p>
 
 <div class="dss">
   <div class="head"><span class="step">STEP 27</span>Map the journey library with an agent</div>
   <div class="cols">
-    <div><span class="lbl">Do</span>Open <a href="https://app.coderabbit.ai/verify/repositories">Verification → Test suites</a> → <code>mmani-demo-prs</code> → User journeys. For a new repo, click <b>Map with an Agent</b>, review the proposal, and reply "Apply all nine journeys."</div>
+    <div><span class="lbl">Do</span>Open <a href="https://app.coderabbit.ai/verify/repositories/3f51f96e-6560-4465-bce3-bcc368193872?view=journeys">Verify → <code>mmani-demo-prs</code> → Journey Testing</a> → User journeys. For a new repo, click <b>Map with an Agent</b>, review the proposal, and reply "Apply all nine journeys."</div>
     <div class="say"><span class="lbl">Say</span>"PR testing checks one change. Journeys check the product: browsing, carts, discounts, checkout, stock, privacy, and the fulfillment handoff — written once, run on every branch."</div>
     <div><span class="lbl">See</span>Nine journeys, each with a user, a goal, test steps, and assertions grounded in the source.</div>
   </div>
@@ -529,7 +529,7 @@ major or critical SECURITY issue ...</pre>
   <tr><td>Pre-merge checks</td><td>Security Gate error; S7 Not met</td><td>Order Invariants error; S1–S3 Not met</td></tr>
   <tr><td>Triage</td><td colspan="2">PR #3 card: Medium risk, High blast radius</td></tr>
   <tr><td>Change Stack</td><td>Layer 2; Blast Radius; architecture impact</td><td>Layer 3; architecture impact (retained concern)</td></tr>
-  <tr><td>QA Agent</td><td>Scenario 3: injected code returned 200 and applied WELCOME10</td><td>Scenario 2: subtotal 4,000 vs 6,000; mug net −2,500; consumer line quantity −1</td></tr>
+  <tr><td>Verify PR testing</td><td>Scenario 3: injected code returned 200 and applied WELCOME10</td><td>Scenario 2: subtotal 4,000 vs 6,000; mug net −2,500; consumer line quantity −1</td></tr>
   <tr><td>User journeys</td><td>—</td><td>5 of 9 journeys fail on the agent branch (all pass on main): −$25.00 storefront total; quantity −1 in the fulfillment feed</td></tr>
   <tr><td>Deep Scan</td><td>High, CWE-89, <code>discounts.ts:20</code>, reachable from the gateway route</td><td>Medium, CWE-682, <code>discounts.ts:66</code></td></tr>
   <tr><td>Attack Surface</td><td>Red tile in services → Sinks; data flow around <code>findDiscountCode</code></td><td>Orange Medium tiles in the same lane</td></tr>
@@ -558,13 +558,13 @@ major or critical SECURITY issue ...</pre>
   <tr><td>Triage</td><td><a href="https://app.coderabbit.ai/triage?repo=mmani-demo-prs">app.coderabbit.ai/triage?repo=mmani-demo-prs</a></td></tr>
   <tr><td>Change Stack</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&amp;reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365">overview (f8c4f9b)</a> · <a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/layers/2?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&amp;reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365">layer 2</a></td></tr>
   <tr><td>Security Blast radius</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/blast-radius?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&amp;reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365">blast radius (f8c4f9b)</a></td></tr>
-  <tr><td>QA Agent run</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/qa-agent?qaRunId=b2070439-9e89-49bd-a484-5bcfe3dbdff6&amp;qaView=history">PR #3 QA run</a></td></tr>
+  <tr><td>Verify PR run</td><td><a href="https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/verify?qaRunId=b2070439-9e89-49bd-a484-5bcfe3dbdff6&amp;qaView=history">PR #3 Verify run</a></td></tr>
   <tr><td>Deep Scan</td><td><a href="https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&amp;repo=mmani-demo-prs&amp;tab=code&amp;scanId=2b10cbc0-68c6-404b-927b-7963e1ed70ab">scan 2b10cbc0 findings</a></td></tr>
   <tr><td>Attack Surface</td><td><a href="https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&amp;repo=mmani-demo-prs">mmani-demo-prs → Attack surface</a></td></tr>
   <tr><td>Fix with AI task</td><td><a href="https://app.coderabbit.ai/code/tasks/6265b19c-1bba-49ef-ac60-f4f66a4dd2a2">task 6265b19c</a></td></tr>
   <tr><td>Approvals repo</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/blob/main/.coderabbit.yaml">.coderabbit.yaml</a> · <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/tree/main/.coderabbit/pre-merge-checks">pre-merge-checks/</a> · <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/settings/branches">branch rules</a></td></tr>
   <tr><td>Approval outcomes</td><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/3">PR #3 approved</a> · <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/1">PR #1 finding</a> · <a href="https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/2">PR #2 high risk</a> · Jira <a href="https://coderabbit-demo.atlassian.net/browse/SC-45">SC-45</a></td></tr>
-  <tr><td>Verification / Testing</td><td><a href="https://app.coderabbit.ai/verify/repositories">app.coderabbit.ai/verify/repositories</a> → Test suites → mmani-demo-prs</td></tr>
+  <tr><td>Verify user journeys</td><td><a href="https://app.coderabbit.ai/verify/repositories/3f51f96e-6560-4465-bce3-bcc368193872?view=journeys">Verify → mmani-demo-prs → Journey Testing</a></td></tr>
 </table>
 
 <h3 class="pb">Appendix B — Focused PRs for single-feature demos</h3>

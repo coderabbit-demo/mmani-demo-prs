@@ -122,11 +122,11 @@ open -a "Google Chrome" \
   "https://app.coderabbit.ai/triage?repo=mmani-demo-prs" \
   "https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365" \
   "https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/blast-radius?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365" \
-  "https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/qa-agent?qaRunId=b2070439-9e89-49bd-a484-5bcfe3dbdff6&qaView=history" \
+  "https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/verify?qaRunId=b2070439-9e89-49bd-a484-5bcfe3dbdff6&qaView=history" \
   "https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&repo=mmani-demo-prs&tab=code&scanId=2b10cbc0-68c6-404b-927b-7963e1ed70ab" \
   "https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&repo=mmani-demo-prs" \
   "https://app.coderabbit.ai/code/tasks/6265b19c-1bba-49ef-ac60-f4f66a4dd2a2" \
-  "https://app.coderabbit.ai/verify/repositories" \
+  "https://app.coderabbit.ai/verify/repositories/3f51f96e-6560-4465-bce3-bcc368193872?view=journeys" \
   "http://localhost:5173/" \
   "https://github.com/coderabbit-demo/mmani-demo-prs-approvals/blob/main/.coderabbit.yaml" \
   "https://github.com/coderabbit-demo/mmani-demo-prs-approvals/tree/main/.coderabbit/pre-merge-checks" \
@@ -139,9 +139,9 @@ open -a "Google Chrome" \
 Tab order (deck first, then app home, then one tab per demo stop):
 1. SE demo deck · 2. app.coderabbit.ai · 3. Jira SC-10 · 4. GitHub PR #3 ·
 5-8. Steps 7-9 finding deep links (F1 discounts.ts:20; F2 discounts.ts:73, :30; db.ts:17) ·
-9. Triage · 10. Change Stack overview · 11. Security Blast radius · 12. QA Agent run ·
+9. Triage · 10. Change Stack overview · 11. Security Blast radius · 12. Verify PR run ·
 13. Deep Scan `2b10cbc0` · 14. Attack Surface · 15. Fix with AI task `6265b19c` ·
-16. Verification/Testing (→ Test suites → mmani-demo-prs → User journeys) ·
+16. Verify → mmani-demo-prs → Journey Testing (User journeys) ·
 17. Storefront `localhost:5173` (live buggy app — Phase 3 must be up first; leave it fresh) ·
 Stage 8, approvals repo: 18. `.coderabbit.yaml` (Step 31) · 19. `.coderabbit/pre-merge-checks/`
 (Step 31) · 20. Branch rules (Step 32; admin only) · 21. PR #3, CodeRabbit approved (Step 33) ·
