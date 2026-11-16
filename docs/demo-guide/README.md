@@ -3,7 +3,7 @@
 `mmani-demo-guide.pdf` is the Do / Say / See runbook for the PR #3 demo. It follows two
 findings — F1, the SQL injection at `services/orders/src/discounts.ts:20`, and F2, the
 double-counted, uncapped discount — through the CLI, VS Code, the PR review, Triage,
-Change Stack, QA Agent, Deep Scan, and QA user journeys. A copy lives in Drive as
+Change Stack, CodeRabbit Verify PR testing, Deep Scan, Verify user journeys, and the approval policy. A copy lives in Drive as
 `mmani-demo-guide.pdf`.
 
 | Path | What it is |

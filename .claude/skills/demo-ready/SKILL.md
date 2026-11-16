@@ -1,6 +1,6 @@
 ---
 name: demo-ready
-description: Get the machine ready for the mmani-demo-prs SE demo — sync the local repo to the pre-PR branch state, run the freshness check, open a fresh Chrome window with all demo tabs (SE deck first), and open VS Code on the project. Trigger on "/demo-ready", "get me ready for the demo", "set up the demo", "demo prep".
+description: Get the machine ready for the mmani-demo-prs SE demo — sync the local repo to the pre-PR branch state, run the freshness check (including the mmani-demo-prs-approvals repo for the approval-policy stage), open a fresh Chrome window with all demo tabs (SE deck first), and open VS Code on the project. Trigger on "/demo-ready", "get me ready for the demo", "set up the demo", "demo prep".
 ---
 
 # demo-ready
@@ -11,6 +11,12 @@ Appendix A/C). Run all five phases in order and report a short summary at the en
 
 Repo path: `~/projects/mmani-demo-prs`. **Never push** `agent/discount-codes` or
 `demo/agent-base` — every push to the agent branch triggers a new review. Nothing here pushes.
+
+Stage 8 (approval policy) uses a second repo, `coderabbit-demo/mmani-demo-prs-approvals`, with
+three open PRs: #3 (CodeRabbit approved), #1 (low risk, Major finding), #2 (high risk). It needs
+no local checkout. **Never push** to its branches (`fix/expired-discount-message`,
+`feat/reuse-fixed-code-new-cart`, `perf/discount-write-lock`) and never approve, merge, or
+resolve threads on those PRs: a push re-runs the review and dismisses PR #3's approval.
 
 ## Phase 1 — Sync local to the pre-PR state
 
@@ -48,6 +54,26 @@ remaining items (live, must be eyeballed in the browser once the tabs are open) 
 - Fix with AI task `6265b19c` exists. **Do not** click Recheck, Fix, Create PR, or Commit and
   push — each one pushes or re-scans and marks F1 Fixed (can't be undone short of a re-scan).
 - Do not start a new Deep Scan during the demo.
+
+Then auto-check the approvals repo (read-only `gh`; it needs the sandbox disabled for the
+keychain and TLS):
+
+```bash
+A=coderabbit-demo/mmani-demo-prs-approvals
+for n in 3 1 2; do gh pr view $n -R $A --json number,state,reviewDecision,labels,latestReviews \
+  --jq '"PR #\(.number) \(.state) decision=\(.reviewDecision) coderabbit=\([.latestReviews[]|select(.author.login|test("coderabbit"))|.state]|join(",")) labels=\([.labels[].name]|join(","))"'; done
+gh api repos/$A/branches/main/protection --jq '"approvals=\(.required_pull_request_reviews.required_approving_review_count) checks=\([.required_status_checks.checks[].context]|join(", "))"'
+```
+
+Expect:
+- `PR #3 OPEN decision=REVIEW_REQUIRED coderabbit=APPROVED` (1 of 2 approvals).
+- `PR #1` and `PR #2`: `OPEN decision=CHANGES_REQUESTED coderabbit=CHANGES_REQUESTED`.
+- All three labeled `Demo - Do not merge`.
+- `approvals=2`, checks = `check` plus three `CodeRabbit / …` checks.
+
+Flag any difference. If PR #3 shows `APPROVED` as the decision, someone else approved it and it
+is now mergeable. If its CodeRabbit review is no longer `APPROVED`, a push dismissed it: wait
+for the new review to finish before the demo.
 
 ## Phase 3 — Start the demo server (buggy agent branch)
 
@@ -96,21 +122,30 @@ open -a "Google Chrome" \
   "https://app.coderabbit.ai/triage?repo=mmani-demo-prs" \
   "https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/overview?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365" \
   "https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/blast-radius?toCommitId=f8c4f9b8e5063afb6c1519f03cc199b9f7e2d51e&reviewRunId=52e242bc-2bab-4445-938d-5d44d22fb365" \
-  "https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/qa-agent?qaRunId=b2070439-9e89-49bd-a484-5bcfe3dbdff6&qaView=history" \
+  "https://app.coderabbit.ai/change-stack/coderabbit-demo/mmani-demo-prs/pull/3/verify?qaRunId=b2070439-9e89-49bd-a484-5bcfe3dbdff6&qaView=history" \
   "https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&repo=mmani-demo-prs&tab=code&scanId=2b10cbc0-68c6-404b-927b-7963e1ed70ab" \
   "https://app.coderabbit.ai/security/repositories?owner=coderabbit-demo&repo=mmani-demo-prs" \
   "https://app.coderabbit.ai/code/tasks/6265b19c-1bba-49ef-ac60-f4f66a4dd2a2" \
-  "https://app.coderabbit.ai/verify/repositories" \
-  "http://localhost:5173/"
+  "https://app.coderabbit.ai/verify/repositories/3f51f96e-6560-4465-bce3-bcc368193872?view=journeys" \
+  "http://localhost:5173/" \
+  "https://github.com/coderabbit-demo/mmani-demo-prs-approvals/blob/main/.coderabbit.yaml" \
+  "https://github.com/coderabbit-demo/mmani-demo-prs-approvals/tree/main/.coderabbit/pre-merge-checks" \
+  "https://github.com/coderabbit-demo/mmani-demo-prs-approvals/settings/branches" \
+  "https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/3" \
+  "https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/1" \
+  "https://github.com/coderabbit-demo/mmani-demo-prs-approvals/pull/2"
 ```
 
 Tab order (deck first, then app home, then one tab per demo stop):
 1. SE demo deck · 2. app.coderabbit.ai · 3. Jira SC-10 · 4. GitHub PR #3 ·
 5-8. Steps 7-9 finding deep links (F1 discounts.ts:20; F2 discounts.ts:73, :30; db.ts:17) ·
-9. Triage · 10. Change Stack overview · 11. Security Blast radius · 12. QA Agent run ·
+9. Triage · 10. Change Stack overview · 11. Security Blast radius · 12. Verify PR run ·
 13. Deep Scan `2b10cbc0` · 14. Attack Surface · 15. Fix with AI task `6265b19c` ·
-16. Verification/Testing (→ Test suites → mmani-demo-prs → User journeys) ·
-17. Storefront `localhost:5173` (live buggy app — Phase 3 must be up first; leave it fresh).
+16. Verify → mmani-demo-prs → Journey Testing (User journeys) ·
+17. Storefront `localhost:5173` (live buggy app — Phase 3 must be up first; leave it fresh) ·
+Stage 8, approvals repo: 18. `.coderabbit.yaml` (Step 31) · 19. `.coderabbit/pre-merge-checks/`
+(Step 31) · 20. Branch rules (Step 32; admin only) · 21. PR #3, CodeRabbit approved (Step 33) ·
+22. PR #1, low risk with a Major finding (Step 34) · 23. PR #2, high risk (Step 35).
 
 **Change Stack / Blast radius revision.** The latest review run (`e7a13a2`, the
 `Merge branch 'main'` head) is **Review skipped — no files to review**, so its Change Stack is
@@ -135,4 +170,5 @@ CodeRabbit panel → Current = `agent/discount-codes`, Compare against = `demo/a
 ## Final report
 
 One short summary: sync result (HEAD / base / file count / clean?), the freshness checklist,
+the approvals-repo check (PR #3 approved 1 of 2; #1 and #2 changes requested; branch rules),
 whether Chrome and VS Code launched, and any item that needs the user's attention.
