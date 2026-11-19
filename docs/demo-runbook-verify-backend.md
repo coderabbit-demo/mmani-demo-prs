@@ -337,18 +337,26 @@ auto_approvals:
 
 ### 6.4 What CodeRabbit approves, and what it doesn't
 
-**Do** On PR #14, show the review decision, the pre-merge checks and the merge box.
+**Do** On PR #14, show the pre-merge checks, then the `@coderabbitai ignore pre-merge checks`
+comment and CodeRabbit's reply, then the approval and the merge box.
 
 **Say** "Minimal risk is necessary, not sufficient. CodeRabbit approves only when the latest commit
 is reviewed, threads are resolved, no pre-merge check is failing, and the risk limits hold. Here two
-Jira checks are inconclusive, because the success criteria ask for evidence a README change can't
-produce, so there is no approval yet. A person decides: provide the evidence, or ignore those checks
-for this PR. Even then CodeRabbit is one of two approvals. PR #3 fails on every count: High risk, a
+Jira checks were inconclusive, because the success criteria ask for evidence a README change can't
+produce, so CodeRabbit held its approval. A person looked, decided the checks don't apply to a copy
+fix, and overrode them for this PR only, on the record. CodeRabbit approved within seconds. It is
+one of two approvals, so a person still has to approve. PR #3 fails on every count: High risk, a
 never-auto-approve path, and six failing checks."
 
 **See** PR #14: Merge Risk Minimal; "Pre-merge checks failed · 2 inconclusive" (Linked Issues,
-Success Criteria); 6 checks passed, including Security Gate and Order Invariants; no CodeRabbit
-approval. This PR is stacked on #13, so its review reads the new policy from the PR head.
+Success Criteria); 6 checks passed, including Security Gate and Order Invariants. Then "Pre-merge
+checks override executed successfully. Overridden by `@manimahesh` via command… Approval outcome:
+Changes approved," and **coderabbitai approved these changes**. The override applies to #14 only,
+and future PRs still enforce the checks. This PR is stacked on #13, so its review reads the new
+policy from the PR head.
+
+> **Before a rerun:** #14 is already approved. To show the withheld state live, use a fresh
+> docs-only PR stacked on `demo/approval-config`, or show this sequence from the PR history.
 
 > **Assumed GitHub rule (not applied by these PRs).** Branch protection or a ruleset on `main`:
 > require 2 approving reviews, dismiss stale approvals on new commits, and require the `check`
@@ -432,6 +440,7 @@ Open the existing Coding Agent task `6265b19c`. Never click **Create PR** or **C
 
 - **Verified November 19:** the separate-PR option is the **Create a new PR** box under
   **Generate unit tests (beta)** in PR #3's summary; it produced #17 (4.4).
-- **Verified November 19:** PR #14 is Merge Risk Minimal, and CodeRabbit did not approve it,
-  because two Jira checks are inconclusive (6.2, 6.4).
+- **Verified November 19:** PR #14 is Merge Risk Minimal. CodeRabbit held approval while two Jira
+  checks were inconclusive, then approved 13 seconds after `@coderabbitai ignore pre-merge checks`
+  (6.2, 6.4).
 - **Assumption:** the GitHub two-approval rule on `main` (6.4) is not set by these PRs.
