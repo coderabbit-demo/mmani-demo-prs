@@ -53,13 +53,17 @@
   .pb { page-break-before: always; }
   a { color: #1a5fb4; text-decoration: none; }
   .small { font-size: 9pt; color: var(--muted); }
+  .p3 h3, .p3 .dss { break-before: auto; }
+  .p3 h3 { margin-top: 18pt; }
+  .p3 .dss { margin-top: 10pt; }
+  .dss pre.cmd { margin: 0 10pt 10pt; font-size: 7.8pt; break-inside: avoid; }
 </style>
 </head>
 <body>
 
 <div class="kicker">Internal · Do / Say / See runbook · CodeRabbit Field Engineering Enablement</div>
 <h1>Follow one finding: from Jira ticket to Deep Scan</h1>
-<p class="lede">A single feature, written by a coding agent, followed end to end: local review in the CLI and VS Code, the pull request review, Triage, Change Stack, Verify, the Security Deep Scan and Attack Surface, Fix with AI, and Verify journey testing. The same two findings appear at every stop. Demo repository <code>coderabbit-demo/mmani-demo-prs</code>, PR #3, Jira story SC-10. Captured October 28, 2026, in light mode. Allow about 30 minutes plus questions.</p>
+<p class="lede">A single feature, written by a coding agent, followed end to end: local review in the CLI and VS Code, the pull request review, Triage, Change Stack, Verify, the Security Deep Scan and Attack Surface, Fix with AI, and Verify journey testing. The same two findings appear at every stop. Demo repository <code>coderabbit-demo/mmani-demo-prs</code>, PR #3, Jira story SC-10. Captured October 28, 2026, in light mode. Allow about 30 minutes plus questions. Part III adds a 42-minute running order for Verify, backend tests, regression and approvals (updated November 19, 2026).</p>
 
 <div class="call"><b class="t">Open with this</b> "One Jira ticket, one coding agent, one branch. Let's follow two things the agent got wrong — a security hole and a money bug — from the developer's laptop all the way to the security team's scan. Same findings, every stop."</div>
 
@@ -442,7 +446,170 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
 
 <div class="call"><b class="t">The line that lands</b> "One ticket, one agent, two mistakes — and every stop saw them: my laptop, the PR, the reviewer's queue, the architecture view, the test run, and the security scan. Nothing reached main."</div>
 
-<h2 class="pb">Part III — Reference</h2>
+<section class="p3">
+<h2 class="pb">Part III — The 42-minute session: Verify, backend tests, regression and approvals</h2>
+<p>A second running order for the same PR #3 story, built around Verify, backend testing, regression and approvals. It reuses steps from Part II by number and adds new steps (31–41) for the new flows. Markdown copy: <code>docs/demo-runbook-verify-backend.md</code>. Timings add up to 42 minutes.</p>
+<table>
+<tr><th>PR</th><th>Branch</th><th>Role</th></tr>
+<tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/3">#3</a></td><td><code>agent/discount-codes</code></td><td>The agent's PR with F1 and F2. Merge Risk <b>High</b>.</td></tr>
+<tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/14">#14</a> · SC-46</td><td><code>demo/low-risk-copy</code></td><td>README-only copy fix, stacked on #13. Merge Risk <b>Minimal</b>.</td></tr>
+<tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/13">#13</a> · SC-47</td><td><code>demo/approval-config</code></td><td>Approval policy in <code>.coderabbit.yaml</code>.</td></tr>
+<tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/15">#15</a> · SC-48</td><td><code>test/discount-regression</code></td><td>Regression tests for the F2 cap and single deduction.</td></tr>
+</table>
+<div class="call dont"><b class="t">Don't do this</b> Never push to <code>agent/discount-codes</code>: a push re-triggers the PR #3 review. Leave the F1 and F2 threads unresolved. All new PRs are drafts labeled <b>Demo - Do not merge</b>; drafts are not reviewed or verified automatically, so ask with <code>@coderabbitai review</code> or <code>@coderabbitai verify</code>.</div>
+
+<h3>Stage S1 · Frame (2 min)</h3>
+<div class="dss">
+  <div class="head"><span class="step">STEP 31</span>Frame the session</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open SC-10 from the Jira link in PR #3's description, then return to PR #3.</div>
+    <div class="say"><span class="lbl">Say</span>"A coding agent built this discount feature from a Jira ticket, and its tests pass. Today we show four things CodeRabbit adds after the code review: it tests the claims against the running app, it reaches the backend and the services this one feeds, it keeps the bug from coming back, and it decides which pull requests a person still has to approve."</div>
+    <div><span class="lbl">See</span>PR #3, labeled <b>Demo - Do not merge</b>, with Merge Risk <b>High</b> in the summary.</div>
+  </div>
+</div>
+
+<h3>Stage S2 · How Verify works (6 min)</h3>
+<p class="small">Run <a href="#step-16">Step 16</a> (Verify on PR #3) and <a href="#step-17">Step 17</a> (F2 proven in the running app) as written. The command is <code>@coderabbitai verify</code>. Add this line to Step 16's Say: "Automatic runs skip drafts, so on a draft you ask for one with this comment."</p>
+
+<h3>Stage S3 · Backend and cross-service (7 min)</h3>
+<div class="dss">
+  <div class="head"><span class="step">STEP 32</span><span class="tag f2">F2</span> <span class="tag f1">F1</span> The same scenarios as raw HTTP calls</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Run the agent branch locally in a detached checkout (never push from it): <code>git worktree add --detach ../mmani-agent origin/agent/discount-codes</code>, then <code>npm ci</code> and <code>npm run dev</code>. In a terminal, run the calls below against the gateway on <code>:8080</code>. Then open scenario 3 (<a href="#step-18">Step 18</a>) and show <b>Checks → Failed</b>.</div>
+    <div class="say"><span class="lbl">Say</span>"Verify isn't only clicking through a storefront. Under the UI these are API calls, and you can replay every one. Here are scenarios 2 and 3 as plain HTTP against the gateway."</div>
+    <div><span class="lbl">See</span>Exactly Verify's observed values: subtotal 4,000 instead of 6,000, a <code>DISCOUNT-SAVE20</code> line with quantity −1 in the order fulfillment reads, a mug net of −2,500, and the injected code accepted with <b>200</b>. On <code>main</code> the same calls give a 6,000 subtotal, no discount line, a mug net of 0, and <b>400</b> for the injected code.</div>
+  </div>
+<pre class="cmd">GW=http://localhost:8080/api
+ADA='Authorization: Bearer demo-ada'      # synthetic demo shopper, not a credential
+GRACE='Authorization: Bearer demo-grace'
+JSON='Content-Type: application/json'
+
+# Scenario 2: hoodie cart + SAVE20, then checkout and the order fulfillment reads
+ORDER=$(curl -s -X POST "$GW/orders" -H "$ADA" | jq -r .id)
+curl -s -X PUT "$GW/orders/$ORDER/lines/HOODIE-GRY-L" -H "$ADA" -H "$JSON" -d '{"quantity":1}' &gt;/dev/null
+curl -s -X POST "$GW/orders/$ORDER/discount" -H "$ADA" -H "$JSON" -d '{"code":"SAVE20"}' | jq -c .totals
+curl -s -X POST "$GW/orders/$ORDER/checkout" -H "$ADA" -o /dev/null -w 'checkout %{http_code}\n'
+curl -s "$GW/orders/$ORDER" -H "$ADA" | jq -c '[.lines[] | {sku, quantity}]'
+  → {"subtotalCents":4000,"discountCents":2000,"netCents":2000}
+  → [{"sku":"DISCOUNT-SAVE20","quantity":-1},{"sku":"HOODIE-GRY-L","quantity":1}]
+
+# Scenario 2: a $20 code on a $15 mug
+MUG=$(curl -s -X POST "$GW/orders" -H "$GRACE" | jq -r .id)
+curl -s -X PUT "$GW/orders/$MUG/lines/MUG-CERAMIC" -H "$GRACE" -H "$JSON" -d '{"quantity":1}' &gt;/dev/null
+curl -s -X POST "$GW/orders/$MUG/discount" -H "$GRACE" -H "$JSON" -d '{"code":"SAVE20"}' | jq -c .totals
+  → {"subtotalCents":-500,"discountCents":2000,"netCents":-2500}
+
+# Scenario 3 (F1): SQL in the code applies a different promotion
+CART=$(curl -s -X POST "$GW/orders" -H "$ADA" | jq -r .id)
+curl -s -X PUT "$GW/orders/$CART/lines/HOODIE-GRY-L" -H "$ADA" -H "$JSON" -d '{"quantity":1}' &gt;/dev/null
+curl -s -X POST "$GW/orders/$CART/discount" -H "$ADA" -H "$JSON" \
+  -d "{\"code\":\"X') OR code = 'WELCOME10' --\"}" -o /dev/null -w '%{http_code}\n'
+  → 200   (applies DISCOUNT-WELCOME10 for 600 cents)</pre>
+</div>
+<p class="small">Then run <a href="#step-9">Step 9</a> (it breaks another repository). Add to its See: <code>knowledge_base.linked_repositories</code> lists <code>coderabbit-demo/mmani-demo-prs-consumer</code> and, with #13, <code>coderabbit-demo/coderabbit-standards</code>.</p>
+
+<h3>Stage S4 · Regression (8 min)</h3>
+<p class="small">Run <a href="#step-27">Step 27</a> (journey library) and <a href="#step-28">Steps 28</a>–<a href="#step-29">29</a> (baseline on main, five failures on the agent branch), then the three new steps.</p>
+<div class="dss">
+  <div class="head"><span class="step">STEP 33</span>Run the journeys on a schedule</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>On the repository's Verify page, open <b>Journey Testing → Schedules</b> and show (or create) a schedule that runs the journeys on <code>main</code>.</div>
+    <div class="say"><span class="lbl">Say</span>"Regressions don't announce themselves in a PR. A schedule runs the same library on a branch every day and can file Jira issues for new findings."</div>
+    <div><span class="lbl">See</span>Branch, time, days of week, timezone, and the optional <b>Auto create issues</b> setting.</div>
+  </div>
+</div>
+<div class="dss">
+  <div class="head"><span class="step">STEP 34</span>Generate unit tests in a separate PR</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>In PR #3's CodeRabbit summary, expand <b>Finishing Touches → Generate unit tests (beta)</b> and tick <b>Create a new PR</b> (or comment <code>@coderabbitai generate unit tests</code>). For the demo, open the existing run: <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/17">#17</a>, generated from PR #3 into four test files.</div>
+    <div class="say"><span class="lbl">Say</span>"Finishing touches can write the tests too. As a separate PR, they are reviewed on their own, and CodeRabbit reads the CI logs and fixes build failures in the tests it wrote."</div>
+    <div><span class="lbl">See</span>"Generating unit tests… This may take up to 20 minutes", a Coding Agent task, then a new PR based on <code>agent/discount-codes</code>.</div>
+  </div>
+  <div class="call dont"><b class="t">Don't do this</b> Never tick <b>Commit to this branch</b> on PR #3. It commits to <code>agent/discount-codes</code> and re-triggers the PR #3 review.</div>
+</div>
+<div class="dss">
+  <div class="head"><span class="step">STEP 35</span><span class="tag f2">F2</span> The fix, with a regression test</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/15">#15</a> and <code>tests/discount-regression.test.ts</code>. Show the same tests run against the agent branch.</div>
+    <div class="say"><span class="lbl">Say</span>"This test keeps F2 from coming back. It goes through the gateway, so it doesn't care how the discount is implemented: one deduction, capped, never negative. It passes on main. Against the agent's branch all six fail, with the numbers Verify reported."</div>
+    <div><span class="lbl">See</span>On <code>main</code>, <code>npm run check</code> passes 26 tests. On the agent branch, 6 of 6 fail.</div>
+  </div>
+<pre class="cmd">✖ F2 cap: a fixed code larger than the cart nets zero, not a negative total
+    actual:   { subtotalCents: -500, discountCents: 2000, netCents: -2500 }
+    expected: { subtotalCents: 1500, discountCents: 1500, netCents: 0 }
+✖ F2 single deduction: the discount is not also stored as an order line
+    actual:   [ [ 'DISCOUNT-WELCOME10', -1 ], [ 'HOODIE-GRY-L', 1 ] ]
+✖ F2 single deduction: re-applying the same code does not deduct it again
+    actual:   { subtotalCents: 5460, discountCents: 1140, netCents: 4320 }
+ℹ tests 6  pass 0  fail 6</pre>
+</div>
+
+<h3>Stage S5 · Deterministic results (6 min)</h3>
+<div class="dss">
+  <div class="head"><span class="step">STEP 36</span>Results are assertions, and only Passed is a pass</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open a failing journey from Step 29, for example <i>Redeem fixed discounts within customer and campaign limits</i>, and show its assertions. Then point at the outcome labels on a Verify run.</div>
+    <div class="say"><span class="lbl">Say</span>"Each journey has written assertions: expected, observed, and an execution log. If an error stops testing, the result is Blocked. If the observations can't decide, it's Inconclusive. If nothing ran, it's Skipped. None of those counts as a pass, and even Passed means only that the assessed criteria passed within the tested scope."</div>
+    <div><span class="lbl">See</span>"SAVE20 on a $15 mug produced a −$25 total." Outcome labels: Bugs, Blocked, Blockers, Failed, Passed, Inconclusive, Skipped.</div>
+  </div>
+</div>
+<p class="small">Then run <a href="#step-10">Step 10</a> (pre-merge checks against Jira).</p>
+<div class="dss">
+  <div class="head"><span class="step">STEP 37</span>What an error-mode check does</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <code>.coderabbit.yaml</code> and point at <code>mode: error</code> on <b>Order Invariants</b> and <b>Security Gate</b>.</div>
+    <div class="say"><span class="lbl">Say</span>"These checks are in error mode. With Automatic Approvals on, a failing error check means CodeRabbit will not approve, so a person reviews it. GitHub's branch rules still decide what merges."</div>
+    <div><span class="lbl">See</span>Both checks inline in <code>.coderabbit.yaml</code>, <code>mode: error</code>. On PR #3, both fail.</div>
+  </div>
+  <div class="call dont"><b class="t">Don't do this</b> Don't claim an Inconclusive pre-merge check blocks the PR. Step 36 is about Verify outcomes; for pre-merge checks the docs say Inconclusive does not block.</div>
+</div>
+
+<h3>Stage S6 · Risk and rules (9 min)</h3>
+<p class="small">Run <a href="#step-11">Step 11</a> (Triage), then the new steps.</p>
+<div class="dss">
+  <div class="head"><span class="step">STEP 38</span>Merge Risk: PR #3 versus a README fix</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>On PR #3, expand <b>Merge Risk</b>. Then open <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/14">#14</a> and expand its <b>Merge Risk</b>.</div>
+    <div class="say"><span class="lbl">Say</span>"Same repository, same reviewer. PR #3 changes discount math, the schema and the order contract: High. This one changes README copy and nothing else: Minimal. Each rating names the commit it covers, so a new push needs a new assessment."</div>
+    <div><span class="lbl">See</span>PR #3: Merge Risk <b>High</b> · up to <code>f8c4f</code>, Security architecture risk High, 6 errors and 1 warning. #14: Merge Risk <b>Minimal</b> · up to <code>e4eac</code>, "documentation-only update… does not change runtime behavior."</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/47-pr3-merge-risk-high.jpg" style="max-height:4.2in"><figcaption>PR #3: Merge Risk High, with six failing checks.</figcaption></figure>
+  <figure class="shot"><img src="shots-jpg/46-pr14-merge-risk-minimal.jpg" style="max-height:4.2in"><figcaption>#14: Merge Risk Minimal for a README-only change.</figcaption></figure>
+</div>
+<div class="dss">
+  <div class="head"><span class="step">STEP 39</span>The approval policy lives in the repository</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Open <a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/13/files">#13 → Files changed</a>.</div>
+    <div class="say"><span class="lbl">Say</span>"The policy is code, reviewed like code. CodeRabbit may approve only at low risk. Anything in the orders service needs minimal risk. Discount, pricing, checkout and schema changes are never auto-approved. Authors can't run the approve command on their own PR, because it would skip the thread and check requirements."</div>
+    <div><span class="lbl">See</span><code>merge_risk_instructions</code>; <code>auto_approvals: enabled: true, max_merge_risk: low, allow_author_approval: false</code>; overrides for <code>services/orders/**</code> (minimal) and the discount, pricing, <code>app.ts</code> and <code>db.ts</code> paths (<code>enabled: false</code>).</div>
+  </div>
+  <figure class="shot"><img src="shots-jpg/48-pr13-approval-config.jpg" style="max-height:5in"><figcaption>The approval policy in #13's <code>.coderabbit.yaml</code> diff.</figcaption></figure>
+</div>
+<div class="dss">
+  <div class="head"><span class="step">STEP 40</span>What CodeRabbit approves, and what it doesn't</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>On #14, show the review decision, the pre-merge checks and the merge box.</div>
+    <div class="say"><span class="lbl">Say</span>"Minimal risk is necessary, not sufficient. CodeRabbit approves only when the latest commit is reviewed, threads are resolved, no pre-merge check is failing, and the risk limits hold. Here two Jira checks are inconclusive, because the success criteria ask for evidence a README change can't produce, so there is no approval yet. A person decides: provide the evidence, or ignore those checks for this PR. Even then CodeRabbit is one of two approvals. PR #3 fails on every count: High risk, a never-auto-approve path, and six failing checks."</div>
+    <div><span class="lbl">See</span>#14: Merge Risk Minimal; "Pre-merge checks failed · 2 inconclusive" (Linked Issues, Success Criteria); 6 checks passed, including Security Gate and Order Invariants; no CodeRabbit approval. The stacked config applies because CodeRabbit reads <code>.coderabbit.yaml</code> from the PR head.</div>
+  </div>
+  <div class="call"><b class="t">Assumed GitHub rule</b> Not applied by these PRs. Branch protection or a ruleset on <code>main</code>: require 2 approving reviews, dismiss stale approvals on new commits, and require the <code>check</code> CI job. Until an admin sets it, present it as the policy you would set.</div>
+</div>
+
+<h3>Stage S7 · Two-week pilot close (4 min)</h3>
+<div class="dss">
+  <div class="head"><span class="step">STEP 41</span>Propose a two-week pilot</div>
+  <div class="cols">
+    <div><span class="lbl">Do</span>Show one slide or this step.</div>
+    <div class="say"><span class="lbl">Say</span>"Prove it on your code: one repository with this kind of <code>.coderabbit.yaml</code>; one cross-service journey, like our checkout-to-fulfillment handoff, with the downstream repo linked and the journey scheduled daily on main; one low-risk PR class, such as docs-only, written into <code>merge_risk_instructions</code>; and approvals in observe-only mode for the first week, comparing CodeRabbit's Merge Risk with your reviewers' calls before turning approvals on for that one class."</div>
+    <div><span class="lbl">See</span>Success measure: CodeRabbit's low-risk calls match the human reviewers' calls on every PR in the first week.</div>
+  </div>
+</div>
+
+<div class="call sec"><b class="t">Security session, Nov 24</b> Hold Stage 1 (<a href="#step-3">Steps 3</a>–<a href="#step-4">4</a>, CLI and VS Code) and Stages 5–6 (<a href="#step-19">Steps 19</a>–<a href="#step-26">26</a>, Deep Scan, Attack Surface and Fix with AI) for the security session. They are unchanged in Part II.</div>
+
+</section>
+
+<h2 class="pb">Part IV — Reference</h2>
 
 <h3>The finding trail</h3>
 <table class="trail">
@@ -496,6 +663,10 @@ coderabbit review --committed --base demo/agent-base</pre>To list the stored fin
   <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/6">#6</a> Drop write lock</td><td>Data integrity (non-atomic redemption)</td><td>SC-14</td></tr>
   <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/7">#7</a> Receipt lines</td><td>Cross-repo breaking change</td><td>SC-15</td></tr>
   <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/8">#8</a> Low-stock badge</td><td>Issue validation; out of scope</td><td>SC-17</td></tr>
+  <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/13">#13</a> Approval policy</td><td>Automatic approvals, risk limits, linked repositories (Part III)</td><td>SC-47</td></tr>
+  <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/14">#14</a> README copy fix</td><td>Minimal Merge Risk contrast; stacked on #13</td><td>SC-46</td></tr>
+  <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/15">#15</a> F2 regression tests</td><td>Regression test; Verify on a draft</td><td>SC-48</td></tr>
+  <tr><td><a href="https://github.com/coderabbit-demo/mmani-demo-prs/pull/17">#17</a> Generated unit tests</td><td>Unit test generation (separate PR from #3)</td><td>SC-10</td></tr>
 </table>
 
 
