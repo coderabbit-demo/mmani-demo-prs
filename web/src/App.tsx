@@ -51,6 +51,9 @@ export function App() {
 
   return (
     <div className="shell">
+      <p className="promo" role="note">
+        Free shipping on orders over $50 · Autumn sale now on
+      </p>
       <header>
         <h1>Rabbit Outfitters</h1>
         <label>
@@ -76,7 +79,13 @@ export function App() {
               <h3>{product.name}</h3>
               <p className="muted">{product.category}</p>
               <p className="price">{formatCents(product.priceCents)}</p>
-              <p className="muted">{product.stock} in stock</p>
+              {product.stock === 0 ? (
+                <p className="badge sold-out">Sold out</p>
+              ) : product.lowStock ? (
+                <p className="badge low">Only {product.stock} left</p>
+              ) : (
+                <p className="muted">{product.stock} in stock</p>
+              )}
               <button disabled={busy || product.stock === 0} onClick={() => addToCart(product)}>
                 Add to cart
               </button>

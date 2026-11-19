@@ -47,3 +47,7 @@ button.link { border: none; background: none; color: var(--muted); padding: 0; m
 .code { display: flex; gap: 8px; margin-top: 16px; }
 .code input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
 .code button { margin-top: 0; }
+.badge { margin: 0; font-size: 0.875rem; font-weight: 600; }
+.badge.low { color: var(--accent); }
+.badge.sold-out { color: var(--muted); }
+.promo { margin: 0 0 16px; padding: 8px 12px; border-radius: 8px; background: var(--accent); color: #fff; text-align: center; font-weight: 600; }

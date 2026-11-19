@@ -17,6 +17,7 @@ function toProduct(row: ProductRow): Product {
     category: row.category,
     priceCents: row.price_cents,
     stock: row.stock,
+    lowStock: row.stock > 0 && row.stock < 5,
   };
 }
 

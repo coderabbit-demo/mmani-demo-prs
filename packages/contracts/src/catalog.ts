@@ -8,6 +8,8 @@ export interface Product {
   category: Category;
   priceCents: number;
   stock: number;
+  /** True when stock is running out and the storefront should show a badge. */
+  lowStock: boolean;
 }
 
 export interface ReservationLine {
