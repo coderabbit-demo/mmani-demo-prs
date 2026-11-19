@@ -1,6 +1,6 @@
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
-import { ADA, startStack, type Stack } from "./stack.ts";
+import { ADA, GRACE, startStack, type Stack } from "./stack.ts";
 
 let stack: Stack;
 before(async () => (stack = await startStack()));
@@ -75,4 +75,48 @@ test("checkout skips discount lines when reserving stock", async () => {
 test("products can be sorted by price", async () => {
   const { body } = await stack.call(ADA, "GET", "/products?sort=price_cents");
   assert.equal(body[0].sku, "STICKER-PACK");
+});
+
+
+test("discount route rejects missing, blank, and non-string codes without mutation", async () => {
+  const orderId = await cartWith([["MUG-CERAMIC", 1]]);
+  const original = await stack.call(ADA, "GET", `/orders/${orderId}`);
+  for (const body of [undefined, {}, { code: "" }, { code: " \t " }, { code: null },
+    { code: 123 }, { code: [] }, { code: {} }]) {
+    const result = await stack.call(ADA, "POST", `/orders/${orderId}/discount`, body);
+    assert.equal(result.status, 400, JSON.stringify(body));
+    assert.deepEqual(result.body, { error: "code is required" });
+  }
+  assert.deepEqual((await stack.call(ADA, "GET", `/orders/${orderId}`)).body, original.body);
+});
+
+test("discount route requires sign-in and hides another shopper's order", async () => {
+  const orderId = await cartWith([["MUG-CERAMIC", 1]]);
+  const original = await stack.call(ADA, "GET", `/orders/${orderId}`);
+  assert.equal((await stack.call(null, "POST", `/orders/${orderId}/discount`, { code: "WELCOME10" })).status, 401);
+  assert.equal((await stack.call(GRACE, "POST", `/orders/${orderId}/discount`, { code: "WELCOME10" })).status, 404);
+  assert.deepEqual((await stack.call(ADA, "GET", `/orders/${orderId}`)).body, original.body);
+});
+
+test("discount route validates order IDs and rejects nonexistent orders", async () => {
+  assert.equal((await applyCode("invalid", "WELCOME10")).status, 400);
+  assert.equal((await applyCode("ord_nonexistent", "WELCOME10")).status, 404);
+});
+
+test("placed orders reject discounts without changing the saved order", async () => {
+  const orderId = await cartWith([["MUG-CERAMIC", 1]]);
+  const placed = await stack.call(ADA, "POST", `/orders/${orderId}/checkout`);
+  assert.equal(placed.status, 200);
+  assert.equal((await applyCode(orderId, "WELCOME10")).status, 409);
+  assert.deepEqual((await stack.call(ADA, "GET", `/orders/${orderId}`)).body, placed.body);
+});
+
+test("sort query composes with category and ignores non-scalar values", async () => {
+  const filtered = await stack.call(ADA, "GET", "/products?category=drinkware&sort=price_cents");
+  assert.equal(filtered.status, 200);
+  assert.deepEqual(filtered.body.map((p: { sku: string }) => p.sku), ["MUG-CERAMIC", "BOTTLE-STEEL"]);
+  const defaultOrder = await stack.call(ADA, "GET", "/products");
+  const repeated = await stack.call(ADA, "GET", "/products?sort=name&sort=price_cents");
+  assert.equal(repeated.status, 200);
+  assert.deepEqual(repeated.body, defaultOrder.body);
 });
