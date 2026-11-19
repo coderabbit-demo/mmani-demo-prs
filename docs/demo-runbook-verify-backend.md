@@ -199,15 +199,17 @@ issues** setting.
 
 ### 4.4 Unit test generation
 
-**Do** Show (don't post live) a top-level comment `@coderabbitai generate unit tests` on PR #3.
-When CodeRabbit offers the delivery option, choose **Separate PR**.
+**Do** In PR #3's CodeRabbit summary, expand **Finishing Touches → Generate unit tests (beta)**
+and tick **Create a new PR** (the separate-PR option). For the demo, open the existing result,
+[#17](https://github.com/coderabbit-demo/mmani-demo-prs/pull/17), instead of starting a new run.
 
 **Say** "Finishing touches can write the tests for you. With a separate PR, CodeRabbit also reads
 the CI logs and fixes build failures in the tests it wrote."
 
-**See** A separate pull request with the generated tests.
+**See** "Generating unit tests… This may take up to 20 minutes", a Coding Agent task, then #17:
+four test files, based on `agent/discount-codes`.
 
-> **Never choose "Same PR commit" on PR #3.** It would commit to `agent/discount-codes` and
+> **Never tick "Commit to this branch" on PR #3.** It would commit to `agent/discount-codes` and
 > re-trigger the PR #3 review.
 
 ### 4.5 The fix, with a regression test
@@ -301,11 +303,11 @@ card."
 **Merge Risk**.
 
 **Say** "Same repository, same reviewer. PR #3 changes discount math, the schema and the order
-contract, and it is rated High. This one changes README copy and nothing else, and it is rated low.
-The rating is tied to the commit it covers, so a new push needs a new assessment."
+contract, and it is rated High. This one changes README copy and nothing else, and it is rated
+Minimal. The rating is tied to the commit it covers, so a new push needs a new assessment."
 
-**See** PR #3: **Merge Risk High**, up to `f8c4f`. PR #14: the rating it received
-after `@coderabbitai review` (expected Minimal or Low). Confirm it before the session.
+**See** PR #3: **Merge Risk High**, up to `f8c4f`. PR #14: **Merge Risk Minimal**, up to `e4eac`,
+"This documentation-only update … does not change runtime behavior."
 
 ### 6.3 The approval policy lives in the repository
 
@@ -335,16 +337,18 @@ auto_approvals:
 
 ### 6.4 What CodeRabbit approves, and what it doesn't
 
-**Do** On PR #14, show the review decision and the merge box.
+**Do** On PR #14, show the review decision, the pre-merge checks and the merge box.
 
-**Say** "This PR is stacked on the config PR, so its review reads the new policy. The risk is low,
-there are no findings, and the checks pass, so CodeRabbit approves. It counts as one of two required
-approvals, and a person still has to approve. PR #3's branch doesn't carry this config yet. Under
-it, a High-risk PR that touches `discounts.ts`, with failing error checks, would get no automatic
-approval for three separate reasons."
+**Say** "Minimal risk is necessary, not sufficient. CodeRabbit approves only when the latest commit
+is reviewed, threads are resolved, no pre-merge check is failing, and the risk limits hold. Here two
+Jira checks are inconclusive, because the success criteria ask for evidence a README change can't
+produce, so there is no approval yet. A person decides: provide the evidence, or ignore those checks
+for this PR. Even then CodeRabbit is one of two approvals. PR #3 fails on every count: High risk, a
+never-auto-approve path, and six failing checks."
 
-**See** CodeRabbit's approval on PR #14, plus the merge box asking for one more
-approval. This assumes the GitHub rule below is in place.
+**See** PR #14: Merge Risk Minimal; "Pre-merge checks failed · 2 inconclusive" (Linked Issues,
+Success Criteria); 6 checks passed, including Security Gate and Order Invariants; no CodeRabbit
+approval. This PR is stacked on #13, so its review reads the new policy from the PR head.
 
 > **Assumed GitHub rule (not applied by these PRs).** Branch protection or a ruleset on `main`:
 > require 2 approving reviews, dismiss stale approvals on new commits, and require the `check`
@@ -426,8 +430,8 @@ Open the existing Coding Agent task `6265b19c`. Never click **Create PR** or **C
 
 ## Unverified items
 
-- **UNVERIFIED:** how you choose **Separate PR** after `@coderabbitai generate unit tests`. The
-  docs list both delivery options but don't say how you pick one. Check before 4.4.
-- **UNVERIFIED:** PR #14's Merge Risk level and CodeRabbit's approval, until a
-  review has run on it (6.2, 6.4).
+- **Verified November 19:** the separate-PR option is the **Create a new PR** box under
+  **Generate unit tests (beta)** in PR #3's summary; it produced #17 (4.4).
+- **Verified November 19:** PR #14 is Merge Risk Minimal, and CodeRabbit did not approve it,
+  because two Jira checks are inconclusive (6.2, 6.4).
 - **Assumption:** the GitHub two-approval rule on `main` (6.4) is not set by these PRs.
