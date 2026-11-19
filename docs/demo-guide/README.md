@@ -14,6 +14,8 @@ Change Stack, QA Agent, Deep Scan, and QA user journeys. A copy lives in Drive a
 | `shots-jpg/` | Compressed copies referenced by the HTML. |
 | `mmani-demo-guide.pdf` | Built output. |
 
+Part III (Steps 31–41) is the 42-minute Verify, backend, regression and approvals session, added November 19, 2026. Its screenshots (`46-`–`49-`) were captured in light mode on November 19, 2026.
+
 ## Rebuild the PDF
 
 ```bash
