@@ -30,18 +30,27 @@ Requires Node 24+ (TypeScript runs directly via type stripping).
 
 ```bash
 npm install
-npm run dev          # services + Vite on http://localhost:5173
+npm run dev          # start everything: services + Vite storefront
 npm start            # build the storefront, serve everything on http://localhost:8080
 docker compose up    # same stack in containers on http://localhost:8080
 ```
 
+`npm run dev` starts these local ports:
+
+| Service | Port |
+| --- | --- |
+| Storefront (Vite) | http://localhost:5173 |
+| Gateway (`/api/*`) | http://localhost:8080 |
+| Catalog | http://localhost:4001 |
+| Orders | http://localhost:4002 |
+
 Pick a demo shopper (Ada or Grace) in the header. Data is synthetic and resets on restart
 unless `CATALOG_DB` / `ORDERS_DB` point to files.
 
-## Check it
+## Test it
 
 ```bash
-npm run check        # tsc + integration tests (in-memory stack on ephemeral ports)
+npm run check        # type-check, then run the integration tests (in-memory stack on ephemeral ports)
 ```
 
 ## Engineering rules
