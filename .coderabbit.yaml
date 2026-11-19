@@ -19,6 +19,36 @@ reviews:
   suggested_reviewers: true
   poem: false
 
+  # Approval policy. CodeRabbit may supply ONE approval, and only for low-risk PRs.
+  # Assumes a GitHub rule on main (not set here; an admin configures it):
+  #   branch protection or ruleset on main -> require 2 approving reviews,
+  #   dismiss stale approvals on new commits, and require the "check" CI job.
+  # So a low-risk PR still needs one human approval; anything riskier needs two humans.
+  # Error-mode pre-merge checks below block only by withholding this automatic approval.
+  merge_risk_instructions: >-
+    High risk: any change to discount calculation or redemption, order totals or checkout
+    (services/orders/src/discounts.ts, pricing.ts, the checkout route in app.ts), the orders
+    schema or CHECK constraints (db.ts), the order contract in packages/contracts, SQL built
+    from strings, or removing a transaction or lock. Low risk: documentation, README or copy
+    changes, and test-only changes that touch no runtime code paths.
+  auto_approvals:
+    enabled: true
+    max_merge_risk: low # moderate or higher -> two people approve
+    allow_author_approval: false # authors cannot @coderabbitai approve their own PR
+    overrides:
+      # Anything in the orders service: approve only at minimal risk.
+      - paths:
+          - "services/orders/**"
+        max_merge_risk: minimal
+      # Discount, payment (pricing + checkout in app.ts) and schema code: never auto-approve.
+      - paths:
+          - "services/orders/src/discounts.ts"
+          - "services/orders/src/pricing.ts"
+          - "services/orders/src/app.ts"
+          - "**/db.ts"
+          - "**/*discount*"
+        enabled: false
+
   auto_review:
     enabled: true
     auto_incremental_review: true
@@ -134,3 +164,6 @@ knowledge_base:
         lineTotalCents to SKUs, and caps refunds at netCents. Report changes in this PR that
         would break those call sites, including non-physical or negative-quantity lines and
         negative or double-counted totals.
+    - repository: "coderabbit-demo/coderabbit-standards"
+      instructions: >-
+        Org engineering standards; commerce/*.md holds the order and discount rules this repo must follow.
